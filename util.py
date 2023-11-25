@@ -1,5 +1,5 @@
 import numpy as np
-
+import operator
 class Transform2d:
     def __init__(self, v1=-1, v2=-1, score=-1, transform=np.identity(3), stitchLine=None):
         self.frame1 = v1
@@ -81,7 +81,7 @@ def calculate_color_similarity(point_color, current_color):
     r2, g2, b2 = current_color
     r1, g1, b1 = int(np.uint16(r1)), int(np.uint16(g1)), int(np.uint16(b1))
     r2, g2, b2 = int(np.uint16(r2)), int(np.uint16(g2)), int(np.uint16(b2))
-    
+
     # Calculate the Euclidean distance of a color
     distance = np.sqrt((r1 - r2) ** 2 + (g1 - g2) ** 2 + (b1 - b2) ** 2)
 
@@ -119,7 +119,7 @@ def tranform_ponit(point, transform):
 def calculate_normals(points):
     '''
     Calculate normal vector
-    '''    
+    '''
     tangents = np.diff(points, axis=0)
     normals = np.array([-tangents[:, 1], tangents[:, 0]]).T
 
