@@ -24,7 +24,7 @@ def createTFRecord(tfrecords_filename, dataset_root=Parameters.WorkSpacePath['tr
         return tf.train.Feature(float_list=tf.train.FloatList(value=value))
 
     writer = tf.python_io.TFRecordWriter(tfrecords_filename)
-    training_data_path1 = glob.glob(os.path.join(dataset_root, "*", "*", "std", "training_data_houman_roi", "*"))
+    training_data_path1 = glob.glob(os.path.join(dataset_root, "std", "*"))
     training_data_path = training_data_path1
     random.shuffle(training_data_path)
 

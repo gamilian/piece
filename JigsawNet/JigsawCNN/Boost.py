@@ -384,7 +384,8 @@ def ValidatePathNet(alignments, gt_pose, fragments_dir, net, evaluator, K, Alpha
         # neural network judgement
         image1 = cv2.imread(os.path.join(fragments_dir, "fragment_{0:04}.png".format(v1 + 1)))
         image2 = cv2.imread(os.path.join(fragments_dir, "fragment_{0:04}.png".format(v2 + 1)))
-        item = PairwiseAlignment2Image.FusionImage(image1, image2, trans, bg_color)
+        item = PairwiseAlignment2Image.FusionImage2(image1, image2, trans, bg_color)
+        cv2.imwrite(os.path.join(fragments_dir, "test" , f"fusion_{v1 + 1}_{v2 + 1}_{trans[0][0]}{trans[0][1]}.png"), item[0])
         if len(item) <= 0:
             continue
         path_img, overlap_ratio, transform_offset = item[0], item[1], item[2]

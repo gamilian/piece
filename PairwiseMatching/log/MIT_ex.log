@@ -1,0 +1,117 @@
+2023-11-28 15:40:38,981:INFO:=====================================================================================================
+2023-11-28 15:40:38,981:INFO:Starting main program
+2023-11-28 15:40:38,981:INFO:Processing the dataset MIT_ex with 9 fragments and 32 processes
+2023-11-28 15:40:38,982:INFO:Starting search_pairwise_match_candidates
+2023-11-28 15:40:39,116:INFO:Loading image 1 and image 2
+2023-11-28 15:40:39,117:INFO:Loading image 1 and image 3
+2023-11-28 15:40:39,117:INFO:Loading image 1 and image 4
+2023-11-28 15:40:39,117:INFO:Loading image 1 and image 5
+2023-11-28 15:40:39,117:INFO:Loading image 1 and image 6
+2023-11-28 15:40:39,118:INFO:Loading image 1 and image 7
+2023-11-28 15:40:39,118:INFO:Loading image 1 and image 8
+2023-11-28 15:40:39,118:INFO:Loading image 2 and image 3
+2023-11-28 15:40:39,118:INFO:Loading image 1 and image 9
+2023-11-28 15:40:39,119:INFO:Loading image 2 and image 5
+2023-11-28 15:40:39,119:INFO:Loading image 2 and image 4
+2023-11-28 15:40:39,120:INFO:Loading image 2 and image 8
+2023-11-28 15:40:39,120:INFO:Loading image 2 and image 6
+2023-11-28 15:40:39,120:INFO:Loading image 2 and image 9
+2023-11-28 15:40:39,120:INFO:Loading image 3 and image 4
+2023-11-28 15:40:39,120:INFO:Loading image 2 and image 7
+2023-11-28 15:40:39,120:INFO:Loading image 3 and image 5
+2023-11-28 15:40:39,121:INFO:Loading image 3 and image 6
+2023-11-28 15:40:39,121:INFO:Loading image 3 and image 7
+2023-11-28 15:40:39,121:INFO:Loading image 3 and image 8
+2023-11-28 15:40:39,121:INFO:Loading image 3 and image 9
+2023-11-28 15:40:39,122:INFO:Loading image 4 and image 5
+2023-11-28 15:40:39,122:INFO:Loading image 4 and image 6
+2023-11-28 15:40:39,122:INFO:Loading image 4 and image 7
+2023-11-28 15:40:39,123:INFO:Loading image 4 and image 8
+2023-11-28 15:40:39,123:INFO:Loading image 4 and image 9
+2023-11-28 15:40:39,123:INFO:Loading image 5 and image 6
+2023-11-28 15:40:39,123:INFO:Loading image 5 and image 7
+2023-11-28 15:40:39,124:INFO:Loading image 5 and image 8
+2023-11-28 15:40:39,124:INFO:Loading image 5 and image 9
+2023-11-28 15:40:39,124:INFO:Loading image 6 and image 7
+2023-11-28 15:40:39,124:INFO:Loading image 6 and image 8
+2023-11-28 15:40:42,423:INFO:Find image 1 and image 6 transformation_matrix, the num of match_segments is 1
+2023-11-28 15:40:42,615:INFO:Find image 6 and image 8 transformation_matrix, the num of match_segments is 1114
+2023-11-28 15:40:42,713:INFO:Find image 5 and image 6 transformation_matrix, the num of match_segments is 817
+2023-11-28 15:40:42,881:INFO:Processing image 1 and image 6 complete, cost 3.763416051864624 seconds
+2023-11-28 15:40:42,882:INFO:Loading image 6 and image 9
+2023-11-28 15:40:42,967:INFO:Find image 2 and image 6 transformation_matrix, the num of match_segments is 252
+2023-11-28 15:40:43,032:INFO:Find image 1 and image 5 transformation_matrix, the num of match_segments is 296
+2023-11-28 15:40:43,259:INFO:Find image 4 and image 6 transformation_matrix, the num of match_segments is 400
+2023-11-28 15:40:43,272:INFO:Find image 6 and image 7 transformation_matrix, the num of match_segments is 677
+2023-11-28 15:40:43,336:INFO:Find image 1 and image 2 transformation_matrix, the num of match_segments is 421
+2023-11-28 15:40:43,502:INFO:Find image 1 and image 8 transformation_matrix, the num of match_segments is 0
+2023-11-28 15:40:43,502:INFO:Processing image 1 and image 8 complete, cost 4.383714199066162 seconds
+2023-11-28 15:40:43,503:INFO:Loading image 7 and image 8
+2023-11-28 15:40:43,597:INFO:Find image 5 and image 8 transformation_matrix, the num of match_segments is 599
+2023-11-28 15:40:43,598:INFO:Find image 1 and image 9 transformation_matrix, the num of match_segments is 277
+2023-11-28 15:40:43,753:INFO:Find image 5 and image 9 transformation_matrix, the num of match_segments is 771
+2023-11-28 15:40:43,858:INFO:Find image 4 and image 8 transformation_matrix, the num of match_segments is 231
+2023-11-28 15:40:43,864:INFO:Find image 1 and image 7 transformation_matrix, the num of match_segments is 128
+2023-11-28 15:40:44,062:INFO:Find image 3 and image 6 transformation_matrix, the num of match_segments is 440
+2023-11-28 15:40:44,162:INFO:Find image 2 and image 8 transformation_matrix, the num of match_segments is 176
+2023-11-28 15:40:44,258:INFO:Find image 4 and image 9 transformation_matrix, the num of match_segments is 672
+2023-11-28 15:40:44,388:INFO:Find image 2 and image 9 transformation_matrix, the num of match_segments is 706
+2023-11-28 15:40:44,401:INFO:Find image 5 and image 7 transformation_matrix, the num of match_segments is 736
+2023-11-28 15:40:44,421:INFO:Find image 2 and image 5 transformation_matrix, the num of match_segments is 932
+2023-11-28 15:40:45,562:INFO:Find image 1 and image 3 transformation_matrix, the num of match_segments is 11
+2023-11-28 15:40:45,644:INFO:Find image 3 and image 9 transformation_matrix, the num of match_segments is 151
+2023-11-28 15:40:45,633:INFO:Find image 4 and image 5 transformation_matrix, the num of match_segments is 966
+2023-11-28 15:40:45,978:INFO:Find image 2 and image 4 transformation_matrix, the num of match_segments is 924
+2023-11-28 15:40:46,083:INFO:Find image 2 and image 7 transformation_matrix, the num of match_segments is 375
+2023-11-28 15:40:46,404:INFO:Find image 3 and image 4 transformation_matrix, the num of match_segments is 165
+2023-11-28 15:40:46,516:INFO:Find image 3 and image 8 transformation_matrix, the num of match_segments is 329
+2023-11-28 15:40:46,964:INFO:Find image 3 and image 7 transformation_matrix, the num of match_segments is 262
+2023-11-28 15:40:47,125:INFO:Find image 2 and image 3 transformation_matrix, the num of match_segments is 159
+2023-11-28 15:40:47,190:INFO:Find image 3 and image 5 transformation_matrix, the num of match_segments is 362
+2023-11-28 15:40:47,511:INFO:Find image 4 and image 7 transformation_matrix, the num of match_segments is 442
+2023-11-28 15:40:47,576:INFO:Find image 1 and image 4 transformation_matrix, the num of match_segments is 454
+2023-11-28 15:40:56,038:INFO:Processing image 1 and image 3 complete, cost 16.92074704170227 seconds
+2023-11-28 15:40:56,046:INFO:Loading image 7 and image 9
+2023-11-28 15:40:58,050:INFO:Find image 6 and image 9 transformation_matrix, the num of match_segments is 422
+2023-11-28 15:41:09,773:INFO:Find image 7 and image 8 transformation_matrix, the num of match_segments is 488
+2023-11-28 15:41:11,874:INFO:Find image 7 and image 9 transformation_matrix, the num of match_segments is 417
+2023-11-28 15:42:09,981:INFO:Processing image 1 and image 7 complete, cost 90.86259961128235 seconds
+2023-11-28 15:42:09,987:INFO:Loading image 8 and image 9
+2023-11-28 15:42:20,582:INFO:Processing image 3 and image 9 complete, cost 101.4601092338562 seconds
+2023-11-28 15:42:23,270:INFO:Find image 8 and image 9 transformation_matrix, the num of match_segments is 239
+2023-11-28 15:42:27,742:INFO:Processing image 3 and image 4 complete, cost 108.62057900428772 seconds
+2023-11-28 15:42:44,950:INFO:Processing image 4 and image 8 complete, cost 125.8270058631897 seconds
+2023-11-28 15:42:51,667:INFO:Processing image 2 and image 8 complete, cost 132.54661226272583 seconds
+2023-11-28 15:43:05,026:INFO:Processing image 1 and image 5 complete, cost 145.90851664543152 seconds
+2023-11-28 15:43:05,691:INFO:Processing image 3 and image 7 complete, cost 146.56915187835693 seconds
+2023-11-28 15:43:22,927:INFO:Processing image 1 and image 9 complete, cost 163.8079113960266 seconds
+2023-11-28 15:43:25,564:INFO:Processing image 2 and image 6 complete, cost 166.44374823570251 seconds
+2023-11-28 15:43:32,967:INFO:Processing image 3 and image 5 complete, cost 173.8461356163025 seconds
+2023-11-28 15:43:38,296:INFO:Processing image 3 and image 8 complete, cost 179.1739227771759 seconds
+2023-11-28 15:43:39,548:INFO:Processing image 2 and image 3 complete, cost 180.4287884235382 seconds
+2023-11-28 15:43:52,183:INFO:Processing image 2 and image 7 complete, cost 193.0618290901184 seconds
+2023-11-28 15:44:06,634:INFO:Processing image 1 and image 2 complete, cost 207.51668524742126 seconds
+2023-11-28 15:44:07,979:INFO:Processing image 1 and image 4 complete, cost 208.86120319366455 seconds
+2023-11-28 15:44:16,496:INFO:Processing image 8 and image 9 complete, cost 126.50841164588928 seconds
+2023-11-28 15:44:21,805:INFO:Processing image 4 and image 6 complete, cost 222.6820993423462 seconds
+2023-11-28 15:44:23,920:INFO:Processing image 3 and image 6 complete, cost 224.7990686893463 seconds
+2023-11-28 15:44:34,626:INFO:Processing image 5 and image 8 complete, cost 235.50121569633484 seconds
+2023-11-28 15:44:37,799:INFO:Processing image 4 and image 7 complete, cost 238.67619967460632 seconds
+2023-11-28 15:44:58,737:INFO:Processing image 6 and image 9 complete, cost 255.8549964427948 seconds
+2023-11-28 15:45:10,018:INFO:Processing image 7 and image 8 complete, cost 266.51442098617554 seconds
+2023-11-28 15:45:11,586:INFO:Processing image 2 and image 9 complete, cost 272.46566557884216 seconds
+2023-11-28 15:45:51,143:INFO:Processing image 5 and image 9 complete, cost 312.01869106292725 seconds
+2023-11-28 15:45:56,552:INFO:Processing image 7 and image 9 complete, cost 300.50568175315857 seconds
+2023-11-28 15:45:57,807:INFO:Processing image 6 and image 7 complete, cost 318.68170285224915 seconds
+2023-11-28 15:46:07,736:INFO:Processing image 2 and image 5 complete, cost 328.61647629737854 seconds
+2023-11-28 15:46:19,230:INFO:Processing image 5 and image 7 complete, cost 340.10608100891113 seconds
+2023-11-28 15:46:28,376:INFO:Processing image 2 and image 4 complete, cost 349.25612330436707 seconds
+2023-11-28 15:46:32,520:INFO:Processing image 5 and image 6 complete, cost 353.3961532115936 seconds
+2023-11-28 15:47:00,421:INFO:Processing image 4 and image 5 complete, cost 381.2981696128845 seconds
+2023-11-28 15:47:02,827:INFO:Processing image 4 and image 9 complete, cost 383.70343589782715 seconds
+2023-11-28 15:48:36,647:INFO:Processing image 6 and image 8 complete, cost 477.52244687080383 seconds
+2023-11-28 15:48:36,687:INFO:Complete
+2023-11-28 15:48:36,689:INFO:Complete main program, cost 7.0 minutes 57.707364082336426 seconds
+2023-11-28 15:48:36,689:INFO:=====================================================================================================
+
+
