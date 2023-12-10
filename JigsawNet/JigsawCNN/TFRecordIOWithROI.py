@@ -23,7 +23,7 @@ def createTFRecord(tfrecords_filename, dataset_root=Parameters.WorkSpacePath['tr
     def _float_feature(value):
         return tf.train.Feature(float_list=tf.train.FloatList(value=value))
 
-    writer = tf.python_io.TFRecordWriter(tfrecords_filename)
+    writer = tf.io.TFRecordWriter(tfrecords_filename)
     training_data_path1 = glob.glob(os.path.join(dataset_root, "std", "*"))
     training_data_path = training_data_path1
     random.shuffle(training_data_path)
@@ -74,14 +74,14 @@ def createTFRecord(tfrecords_filename, dataset_root=Parameters.WorkSpacePath['tr
 def readTFRecord(filename_queue):
     reader = tf.TFRecordReader()
     fn, serialized_example = reader.read(filename_queue)
-    features = tf.parse_single_example(serialized_example,
+    features = tf.io.parse_single_example(serialized_example,
         features={
-            'height': tf.FixedLenFeature([], tf.int64),
-            'width': tf.FixedLenFeature([], tf.int64),
-            'id': tf.FixedLenFeature([], tf.int64),
-            'training_input': tf.FixedLenFeature([], tf.string),
-            'training_target': tf.VarLenFeature(tf.float32),
-            'training_roi': tf.VarLenFeature(tf.float32)
+            'height': tf.io.FixedLenFeature([], tf.int64),
+            'width': tf.io.FixedLenFeature([], tf.int64),
+            'id': tf.io.FixedLenFeature([], tf.int64),
+            'training_input': tf.io.FixedLenFeature([], tf.string),
+            'training_target': tf.io.VarLenFeature(tf.float32),
+            'training_roi': tf.io.VarLenFeature(tf.float32)
         })
 
     training_input = tf.decode_raw(features['training_input'], tf.uint8)

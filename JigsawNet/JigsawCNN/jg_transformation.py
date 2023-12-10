@@ -10,19 +10,19 @@ import Utils
 import PairwiseAlignment2Image
 
 def SingleTest(checkpoint_root, K, net, is_training=False):
-    input = tf.placeholder(tf.float32, [None, net.params['height'], net.params['width'], net.params['depth']])
-    roi_box = tf.placeholder(tf.float32, [None, 4])
+    input = tf.compat.v1.placeholder(tf.float32, [None, net.params['height'], net.params['width'], net.params['depth']])
+    roi_box = tf.compat.v1.placeholder(tf.float32, [None, 4])
 
     logits = net._inference(input, roi_box, is_training)
     probability = tf.nn.softmax(logits)
 
     '''restore sessions'''
     sessions = []
-    saver = tf.train.Saver(max_to_keep=2)
+    saver = tf.compat.v1.train.Saver(max_to_keep=2)
     for i in range(K):
         check_point = os.path.join(checkpoint_root, "g%d" % i)
-        sess = tf.Session()
-        sess_init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
+        sess = tf.compat.v1.Session()
+        sess_init_op = tf.group(tf.compat.v1.global_variables_initializer(), tf.compat.v1.local_variables_initializer())
         sess.run(sess_init_op)
         saver.restore(sess, tf.train.latest_checkpoint(check_point + '/'))
         print("restore model %d...Done!" % i)
@@ -48,7 +48,7 @@ def SingleTest(checkpoint_root, K, net, is_training=False):
     for sess in sessions:
         sess.close()
 
-def evaluate_pairwise(alignments, fragments_dir, net, evaluator, K, Alpha, bg_color, save_all_leaner=False):
+def meassure_pairwise(alignments, fragments_dir, net, evaluator, K, Alpha, bg_color, save_all_leaner=False):
     f1 = open(os.path.join(fragments_dir, "filtered_alignments.txt"), 'w+')
 
     for alignment in alignments.data:
@@ -81,20 +81,27 @@ def evaluate_pairwise(alignments, fragments_dir, net, evaluator, K, Alpha, bg_co
         correct_probs = []
         for i in range(len(probs)):
             correct_probs.append(probs[i][1])
-        correct_probability = np.sum(np.multiply(correct_probs, Alpha))/np.sum(Alpha)
+        correct_probability = np.average(correct_probs)
+    
         sign = np.sum(np.multiply(preds, Alpha))
-        if sign > 0:
+        # if sign > 0:
+        #     final_class = 1
+        # else:
+        #     final_class = 0
+        if correct_probability>0.5:
             final_class = 1
         else:
             final_class = 0
         
-        if final_class == 1:
+        if correct_probability > 0.4:
+            cv2.imwrite(os.path.join(fragments_dir, "test" , f"fusion_{v1 + 1}_{v2 + 1}_{trans[0][0]}{trans[0][1]}_{correct_probability}.png"), item[0])
             f1.write("%d\t%d\t%f\t0\n" % (v1, v2, correct_probability))
+            f1.write(correct_probs.__str__())   
             f1.write("%f %f %f\n%f %f %f\n0 0 1\n" % (trans[0, 0], trans[0, 1], trans[0, 2], trans[1, 0], trans[1, 1], trans[1, 2]))
     
     f1.close()
 
-    print("evaluate_pairwise complete!")
+    print("meanssure_pairwise complete!")
 
 
 def main(_):
@@ -103,8 +110,8 @@ def main(_):
     checkpoint_root = Parameters.WorkSpacePath['checkpoint_dir']
     
     '''evaluation '''
-    evaluate_data_root1 = Parameters.WorkSpacePath["example_evaluate_root"]
-    fragments_dirs = glob.glob(os.path.join(evaluate_data_root1, "*_ex"))
+    measure_data_root1 = Parameters.WorkSpacePath["example_measure_root"]
+    fragments_dirs = glob.glob(os.path.join(measure_data_root1, "*_ex"))
 
     with open(os.path.join(checkpoint_root, "alpha.txt")) as f:
         for line in f:
@@ -117,7 +124,7 @@ def main(_):
     evaluator = SingleTest(checkpoint_root=checkpoint_root, K=5, net=net, is_training=False)
 
     for i in range(len(fragments_dirs)):
-        print("dataset %d/%d:" % (i, len(fragments_dirs)))
+        print(f"dataset {i+1}/{len(fragments_dirs)}:  {fragments_dirs[i]}")
         if not os.path.exists(os.path.join(fragments_dirs[i], "alignments.txt")):
             continue
         bg_color_file = os.path.join(fragments_dirs[i], "bg_color.txt")
@@ -130,7 +137,7 @@ def main(_):
     
         relative_alignment = os.path.join(fragments_dirs[i], "alignments.txt")
         alignments = Utils.Alignment2d(relative_alignment)
-        evaluate_pairwise(alignments, fragments_dirs[i], net, evaluator, K, Alpha, bg_color, save_all_leaner=False)
+        meassure_pairwise(alignments, fragments_dirs[i], net, evaluator, K, Alpha, bg_color, save_all_leaner=False)
         print("----------------")
 
 
@@ -138,4 +145,4 @@ def main(_):
 if __name__ == "__main__":
 
 
-    tf.app.run()
+    tf.compat.v1.app.run()

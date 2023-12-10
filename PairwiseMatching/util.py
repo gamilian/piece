@@ -161,8 +161,6 @@ def longest_common_subsequence(cloud1, cloud2, transform, threshold=2):
             j -= 1
 
     return list(reversed(lcs1)), list(reversed(lcs2))
-<<<<<<< HEAD:util.py
-=======
 
 def longest_common_continuous_subsequence_circular(cloud1, cloud2, transform, threshold=2):
     """
@@ -209,4 +207,4 @@ def longest_common_continuous_subsequence_circular(cloud1, cloud2, transform, th
 
 
     return list(reversed(lcs1)), list(reversed(lcs2))
->>>>>>> 7e9a407 (add code of create_CNN_dataset and improve the code):PairwiseMatching/util.py
+

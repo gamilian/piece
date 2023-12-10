@@ -27,17 +27,17 @@ class JigsawNetWithROI:
     def _variable_summaries(self, v, name):
         """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
         with tf.name_scope(name):
-            tf.summary.histogram('histogram', v)
+            tf.compat.v1.summary.histogram('histogram', v)
 
     def _pooling_layer(self, input, name_scope):
-        with tf.variable_scope(name_scope):
-            x = tf.nn.max_pool(input, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1],
+        with tf.compat.v1.variable_scope(name_scope):
+            x = tf.nn.max_pool2d(input, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1],
                                padding='SAME', name="Pooling_layer")
         return x
 
     def _roi_pooling_layer(self, input, name_scope, box):
         """output 4x4"""
-        with tf.variable_scope(name_scope):
+        with tf.compat.v1.variable_scope(name_scope):
             roi_out_size = tf.constant([4, 4])
             box_indices = tf.range(start=0, limit=tf.shape(input)[0], dtype=tf.int32)
             self.box_indices = box_indices
@@ -52,13 +52,13 @@ class JigsawNetWithROI:
         see https://arxiv.org/pdf/1702.03275.pdf
         Also, batch normalization has different behavior between training and testing
         """
-        beta = tf.get_variable(name=beta_name, shape=filter_num, dtype=tf.float32,
+        beta = tf.compat.v1.get_variable(name=beta_name, shape=filter_num, dtype=tf.float32,
                                initializer=tf.constant_initializer(0.0, tf.float32))
-        gamma = tf.get_variable(name=gamma_name, shape=filter_num, dtype=tf.float32,
+        gamma = tf.compat.v1.get_variable(name=gamma_name, shape=filter_num, dtype=tf.float32,
                                 initializer=tf.constant_initializer(1.0, tf.float32))
-        moving_avg = tf.get_variable(name=mov_avg_name, shape=filter_num, dtype=tf.float32,
+        moving_avg = tf.compat.v1.get_variable(name=mov_avg_name, shape=filter_num, dtype=tf.float32,
                                      initializer=tf.constant_initializer(0.0), trainable=False)
-        moving_var = tf.get_variable(name=mov_var_name, shape=filter_num, dtype=tf.float32,
+        moving_var = tf.compat.v1.get_variable(name=mov_var_name, shape=filter_num, dtype=tf.float32,
                                      initializer=tf.constant_initializer(1.0), trainable=False)
 
         control_inputs = []
@@ -84,13 +84,13 @@ class JigsawNetWithROI:
         '''
             operation
         '''
-        with tf.variable_scope("init_conv_layer"):
+        with tf.compat.v1.variable_scope("init_conv_layer"):
             # 1. convolution
-            filter_weights = tf.get_variable(name='ConvLayer_filter', shape=filter_shape,
+            filter_weights = tf.compat.v1.get_variable(name='ConvLayer_filter', shape=filter_shape,
                                              initializer=tf.contrib.layers.xavier_initializer(),
                                              regularizer=tf.contrib.layers.l2_regularizer(
                                                  scale=self.params['weight_decay']))
-            bias = tf.get_variable(name="ConvLayer_biases", initializer=tf.contrib.layers.xavier_initializer(),
+            bias = tf.compat.v1.get_variable(name="ConvLayer_biases", initializer=tf.contrib.layers.xavier_initializer(),
                                    shape=[filter_shape[3]])
             x = tf.nn.conv2d(input, filter=filter_weights, strides=[1, stride, stride, 1], padding="SAME")
             x = tf.nn.bias_add(x, bias)
@@ -113,13 +113,13 @@ class JigsawNetWithROI:
         '''
             operation
         '''
-        with tf.variable_scope(name_scope):
+        with tf.compat.v1.variable_scope(name_scope):
             # 1. convolution
-            filter_weights1 = tf.get_variable(name='ResLayer_filter1', shape=filter_shape1,
+            filter_weights1 = tf.compat.v1.get_variable(name='ResLayer_filter1', shape=filter_shape1,
                                               initializer=tf.contrib.layers.xavier_initializer(),
                                               regularizer=tf.contrib.layers.l2_regularizer(
                                                   scale=self.params['weight_decay']))
-            bias1 = tf.get_variable(name="ResLayer_filter1_biases", initializer=tf.contrib.layers.xavier_initializer(),
+            bias1 = tf.compat.v1.get_variable(name="ResLayer_filter1_biases", initializer=tf.contrib.layers.xavier_initializer(),
                                     shape=[filter_shape1[3]])
             x = tf.nn.conv2d(input, filter=filter_weights1, strides=[1, stride, stride, 1], padding="SAME")
             x = tf.nn.bias_add(x, bias1)
@@ -128,18 +128,18 @@ class JigsawNetWithROI:
             x = self._BN(input=x, filter_num=filter_shape1[3], is_training=is_training, beta_name="ResLayer_BN_beta1",
                           gamma_name="ResLayer_BN_gamma1", mov_avg_name="ResLayer_BN_mov_avg1",
                           mov_var_name="ResLayer_BN_mov_var1")
-            ResLayer_BN_beta1 = [v for v in tf.global_variables() if v.name == name_scope + "/ResLayer_BN_beta1:0"][0]
-            ResLayer_BN_gamma1 = [v for v in tf.global_variables() if v.name == name_scope + "/ResLayer_BN_gamma1:0"][0]
+            ResLayer_BN_beta1 = [v for v in tf.compat.v1.global_variables() if v.name == name_scope + "/ResLayer_BN_beta1:0"][0]
+            ResLayer_BN_gamma1 = [v for v in tf.compat.v1.global_variables() if v.name == name_scope + "/ResLayer_BN_gamma1:0"][0]
             self._variable_summaries(ResLayer_BN_beta1, 'ResLayer_BN_beta1')
             self._variable_summaries(ResLayer_BN_gamma1, 'ResLayer_BN_gamma1')
             # 3. relu
             x = tf.nn.relu(x)
             # 4. convolution
-            filter_weights2 = tf.get_variable(name='ResLayer_filter2', shape=filter_shape2,
+            filter_weights2 = tf.compat.v1.get_variable(name='ResLayer_filter2', shape=filter_shape2,
                                               initializer=tf.contrib.layers.xavier_initializer(),
                                               regularizer=tf.contrib.layers.l2_regularizer(
                                                   scale=self.params['weight_decay']))
-            bias2 = tf.get_variable(name="ResLayer_filter2_biases", initializer=tf.contrib.layers.xavier_initializer(),
+            bias2 = tf.compat.v1.get_variable(name="ResLayer_filter2_biases", initializer=tf.contrib.layers.xavier_initializer(),
                                     shape=[filter_shape2[3]])
             x = tf.nn.conv2d(x, filter=filter_weights2, strides=[1, stride, stride, 1], padding="SAME")
             x = tf.nn.bias_add(x, bias2)
@@ -151,11 +151,11 @@ class JigsawNetWithROI:
             # 6. skip connection
             if filter_in != filter_out:
                 # skip conv
-                filter_weights1 = tf.get_variable(name='ResLayer_skip_filter', shape=filter_shape1,
+                filter_weights1 = tf.compat.v1.get_variable(name='ResLayer_skip_filter', shape=filter_shape1,
                                                   initializer=tf.contrib.layers.xavier_initializer(),
                                                   regularizer=tf.contrib.layers.l2_regularizer(
                                                       scale=self.params['weight_decay']))
-                bias1 = tf.get_variable(name="ResLayer_skip_filter_biases",
+                bias1 = tf.compat.v1.get_variable(name="ResLayer_skip_filter_biases",
                                         initializer=tf.contrib.layers.xavier_initializer(), shape=[filter_shape1[3]])
                 skip_out = tf.nn.conv2d(input, filter=filter_weights1, strides=[1, stride, stride, 1], padding="SAME")
                 skip_out = tf.nn.bias_add(skip_out, bias1)
@@ -186,19 +186,19 @@ class JigsawNetWithROI:
             # 4. fc1 for geometric feature map
             flat_size = input_d * input_geo_h * input_geo_w
             geometric_feature_flat = tf.reshape(geometric_feature, [-1, flat_size])
-            fc_geo_w = tf.get_variable(name='ValueLayer_fc1_geo_w', shape=[flat_size, fc1_geo_dim],
+            fc_geo_w = tf.compat.v1.get_variable(name='ValueLayer_fc1_geo_w', shape=[flat_size, fc1_geo_dim],
                                     initializer=tf.contrib.layers.xavier_initializer(),
                                     regularizer=tf.contrib.layers.l2_regularizer(scale=self.params['weight_decay']))
-            fc_geo_b = tf.get_variable(name='ValueLayer_fc1_geo_bias', shape=[fc1_geo_dim], initializer=tf.zeros_initializer())
+            fc_geo_b = tf.compat.v1.get_variable(name='ValueLayer_fc1_geo_bias', shape=[fc1_geo_dim], initializer=tf.zeros_initializer())
             x_geo = tf.matmul(geometric_feature_flat, fc_geo_w) + fc_geo_b
 
             # 5. fc1 for roi feature map
             flat_size = input_d * input_roi_h * input_roi_w
             roi_feature_flat = tf.reshape(roi_feature, [-1, flat_size])
-            fc_roi_w = tf.get_variable(name='ValueLayer_fc1_roi_w', shape=[flat_size, fc1_roi_dim],
+            fc_roi_w = tf.compat.v1.get_variable(name='ValueLayer_fc1_roi_w', shape=[flat_size, fc1_roi_dim],
                                        initializer=tf.contrib.layers.xavier_initializer(),
                                        regularizer=tf.contrib.layers.l2_regularizer(scale=self.params['weight_decay']))
-            fc_roi_b = tf.get_variable(name='ValueLayer_fc1_roi_bias', shape=[fc1_roi_dim],
+            fc_roi_b = tf.compat.v1.get_variable(name='ValueLayer_fc1_roi_bias', shape=[fc1_roi_dim],
                                        initializer=tf.zeros_initializer())
             x_roi = tf.matmul(roi_feature_flat, fc_roi_w) + fc_roi_b
 
@@ -206,10 +206,10 @@ class JigsawNetWithROI:
             x = tf.concat([x_geo, x_roi], axis=1)
 
             # 5. fully connection 2
-            fc_w2 = tf.get_variable(name='ValueLayer_fc_w2', shape=[fc1_geo_dim+fc1_roi_dim, fc2_dim],
+            fc_w2 = tf.compat.v1.get_variable(name='ValueLayer_fc_w2', shape=[fc1_geo_dim+fc1_roi_dim, fc2_dim],
                                     initializer=tf.contrib.layers.xavier_initializer(),
                                     regularizer=tf.contrib.layers.l2_regularizer(scale=self.params['weight_decay']))
-            fc_b2 = tf.get_variable(name='ValueLayer_fc_bias2', shape=[fc2_dim], initializer=tf.zeros_initializer())
+            fc_b2 = tf.compat.v1.get_variable(name='ValueLayer_fc_bias2', shape=[fc2_dim], initializer=tf.zeros_initializer())
             x = tf.matmul(x, fc_w2) + fc_b2
             self.fc2_shape = tf.shape(x)
 
@@ -222,14 +222,14 @@ class JigsawNetWithROI:
         fc1_roi_dim = 64
         fc2_dim = 2
         '''operation'''
-        with tf.variable_scope("value_head"):
+        with tf.compat.v1.variable_scope("value_head"):
             # 5. fc1 for roi feature map
             flat_size = input_d * input_roi_h * input_roi_w
             roi_feature_flat = tf.reshape(roi_feature, [-1, flat_size])
-            fc_roi_w = tf.get_variable(name='ValueLayer_fc1_roi_w', shape=[flat_size, fc1_roi_dim],
+            fc_roi_w = tf.compat.v1.get_variable(name='ValueLayer_fc1_roi_w', shape=[flat_size, fc1_roi_dim],
                                        initializer=tf.contrib.layers.xavier_initializer(),
                                        regularizer=tf.contrib.layers.l2_regularizer(scale=self.params['weight_decay']))
-            fc_roi_b = tf.get_variable(name='ValueLayer_fc1_roi_bias', shape=[fc1_roi_dim],
+            fc_roi_b = tf.compat.v1.get_variable(name='ValueLayer_fc1_roi_bias', shape=[fc1_roi_dim],
                                        initializer=tf.zeros_initializer())
             x_roi = tf.matmul(roi_feature_flat, fc_roi_w) + fc_roi_b
 
@@ -237,10 +237,10 @@ class JigsawNetWithROI:
             x = x_roi
 
             # 5. fully connection 2
-            fc_w2 = tf.get_variable(name='ValueLayer_fc_w2', shape=[fc1_roi_dim, fc2_dim],
+            fc_w2 = tf.compat.v1.get_variable(name='ValueLayer_fc_w2', shape=[fc1_roi_dim, fc2_dim],
                                     initializer=tf.contrib.layers.xavier_initializer(),
                                     regularizer=tf.contrib.layers.l2_regularizer(scale=self.params['weight_decay']))
-            fc_b2 = tf.get_variable(name='ValueLayer_fc_bias2', shape=[fc2_dim], initializer=tf.zeros_initializer())
+            fc_b2 = tf.compat.v1.get_variable(name='ValueLayer_fc_bias2', shape=[fc2_dim], initializer=tf.zeros_initializer())
             x = tf.matmul(x, fc_w2) + fc_b2
             self.fc2_shape = tf.shape(x)
         return x
@@ -301,9 +301,9 @@ class JigsawNetWithROI:
             entropy_loss = tf.reduce_mean(weighted_cross_e)
         else:
             entropy_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=target_value, logits=pred, name='entropy'))
-        tf.summary.scalar('cross_entropy_loss', entropy_loss)
-        reg_loss = tf.add_n(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES), name='reg_loss')
-        tf.summary.scalar('reg_loss', reg_loss)
+        tf.compat.v1.summary.scalar('cross_entropy_loss', entropy_loss)
+        reg_loss = tf.add_n(tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.REGULARIZATION_LOSSES), name='reg_loss')
+        tf.compat.v1.summary.scalar('reg_loss', reg_loss)
 
         losses = {}
         losses['value_loss'] = entropy_loss
@@ -315,11 +315,11 @@ class JigsawNetWithROI:
         with tf.name_scope('training'):
             # learning_rate = tf.train.exponential_decay(self.params['learning_rate'], global_step, 15000, 0.1, staircase=True)
             learning_rate = self.params['learning_rate']
-            opt = tf.train.AdamOptimizer(learning_rate=learning_rate)
+            opt = tf.compat.v1.train.AdamOptimizer(learning_rate=learning_rate)
             grads_and_vars = opt.compute_gradients(losses['value_loss'] + losses['reg_loss'])
-            tf.summary.scalar('total_loss', losses['value_loss'] + losses['reg_loss'])
+            tf.compat.v1.summary.scalar('total_loss', losses['value_loss'] + losses['reg_loss'])
 
-            update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+            update_ops = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)
             with tf.control_dependencies(update_ops):
                 opt_op = opt.apply_gradients(grads_and_vars, global_step=global_step)
 

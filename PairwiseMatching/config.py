@@ -1,7 +1,7 @@
 import os
 
-dataset = "MIT_ex"
-dataset_path = os.path.join("/work/csl/code/piece/dataset/raw_dataset", dataset)
+dataset = "BGU_ex"
+dataset_path = os.path.join("/work/csl/code/piece/dataset/", dataset)
 
 
 num_fragment = 0
