@@ -243,6 +243,7 @@ class JigsawNetWithROI:
             fc_b2 = tf.compat.v1.get_variable(name='ValueLayer_fc_bias2', shape=[fc2_dim], initializer=tf.zeros_initializer())
             x = tf.matmul(x, fc_w2) + fc_b2
             self.fc2_shape = tf.shape(x)
+            x = tf.nn.softmax(x)
         return x
 
     def _inference(self, input, roi_box, is_training):

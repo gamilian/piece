@@ -22,8 +22,10 @@ Args = []
 def BoostTraining(net, input, roi_box, target, weights, data_ids, tensorboard_dir, checkpoint_dir, is_training=True):
     t1 = time.time()
     target_value = target
+    
     gt_classification = tf.argmax(target, dimension=1, name="gt_classification")
     logits = net._inference(input, roi_box, is_training)
+    
     with tf.name_scope('accuracy'):
         correct_prediction = tf.equal(net.pred, gt_classification)
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
@@ -39,6 +41,8 @@ def BoostTraining(net, input, roi_box, target, weights, data_ids, tensorboard_di
     saver = tf.compat.v1.train.Saver(max_to_keep=2)
 
     with tf.compat.v1.Session() as sess:
+        tf.print(f"target: {target_value}")
+        tf.print(f"logits: {logits}")
         checkpoint_path = tf.train.latest_checkpoint(checkpoint_dir)
         if checkpoint_path:
             print("Restoring checkpoint from:", checkpoint_path)
@@ -135,11 +139,11 @@ def Evaluation(net, input, roi_box, target, weights, data_ids, checkpoint_dir, i
         new_weight = tf.multiply(corresponding_weights, tf.exp(minus_yg))  # w_{k-1,i}exp(-y_i*G_k(x_i))
 
     saver = tf.train.Saver(max_to_keep=2)
-    sess_init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
+    sess_init_op = tf.group(tf.compat.v1.global_variables_initializer(), tf.compat.v1.local_variables_initializer())
     count = 0
     w = 0
     wI = 0
-    with tf.Session() as sess:
+    with tf.compat.v1.Session() as sess:
         sess.run(sess_init_op)
         saver.restore(sess, tf.train.latest_checkpoint(checkpoint_dir + '/'))
         # optimistic_restore(session=sess, save_file=checkpoint_dir + '/-5')
@@ -178,6 +182,7 @@ def Evaluation(net, input, roi_box, target, weights, data_ids, checkpoint_dir, i
 
     print("tp, tn, fp, fn: %d, %d, %d, %d" % (tp, tn, fp, fn))
     Ek = wI/w
+ 
     alpha = 0.5*np.log((1-Ek)/Ek)
     new_weights = np.exp(alpha)*new_weights
     return alpha, new_weights
@@ -497,7 +502,6 @@ def main(_):
         if not os.path.exists(tfrecord_filename):
             TFRecordIOWithROI.createTFRecord(tfrecord_filename, dataset_root=training_directory_root)
         total_record = sum(1 for _ in tf.python_io.tf_record_iterator(tfrecord_filename))
-        # 48780
         # total_record = 610201
         D = np.ones(total_record, dtype=np.float32)         # training data weight, it will be modified according to the evalution result to solve the within class imbalance
         Alpha = np.zeros(K, dtype=np.float32)               # the learner weight which indicates how important the learner is

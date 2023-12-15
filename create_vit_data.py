@@ -123,45 +123,52 @@ def process_path(args):
         return
     
     with global_idx.get_lock():
-        current_dataset_path = os.path.join(training_dataset_path, f"{global_idx.value}")
+        image_path = os.path.join(training_dataset_path, "image", f"{global_idx.value}.png")
         global_idx.value += 1
+        with open(os.path.join(training_dataset_path, "target.txt"), "a+") as f:
+            f.write(f"1\n")
+    cv2.imwrite(image_path, gt_item[0])
+    
 
-    if not os.path.exists(current_dataset_path):
-        os.makedirs(current_dataset_path)
-    with open(os.path.join(current_dataset_path, "target.txt"), "w+") as f:
-        f.write("0 1\n")
-        cv2.imwrite(os.path.join(current_dataset_path, "state.png"), gt_item[0])
-    with open(os.path.join(current_dataset_path, "roi.txt"), "w+") as f:
-        f.write(f"{gt_item[3][0]} {gt_item[3][1]} {gt_item[3][2]} {gt_item[3][3]}\n")
-
-    for _ in range(num_positives - 1):
-        noise_gt = add_uniform_noise_to_rigid_transform_2d(gt_matrix, 0.03, 1)
+    for _ in range(num_positives-1):
+        noise_gt = add_uniform_noise_to_rigid_transform_2d(gt_matrix, 0.05, 3)
         noise_item = FusionImage2(image1, image2, noise_gt, bg_color)
         with global_idx.get_lock():
-            current_dataset_path = os.path.join(training_dataset_path, f"{global_idx.value}")
+            image_path = os.path.join(training_dataset_path, "image", f"{global_idx.value}.png")
             global_idx.value += 1
-        if not os.path.exists(current_dataset_path):
-            os.makedirs(current_dataset_path)
-        with open(os.path.join(current_dataset_path, "target.txt"), "w+") as f:
-            f.write("0 1\n")
-            cv2.imwrite(os.path.join(current_dataset_path, "state.png"), noise_item[0])
-        with open(os.path.join(current_dataset_path, "roi.txt"), "w+") as f:
-            f.write(f"{gt_item[3][0]} {gt_item[3][1]} {gt_item[3][2]} {gt_item[3][3]}\n")
-        
-    
-    for _ in range(num_negatives):
-        erro_matrix = add_erro_to_rigid_transform_2d(gt_matrix, 0.2, 2.7, 2, 10)
+            with open(os.path.join(training_dataset_path, "target.txt"), "a+") as f:
+                f.write(f"1\n")
+        cv2.imwrite(image_path, noise_item[0])
+
+    for _ in range(num_positives//4):
+        erro_matrix = add_erro_to_rigid_transform_2d(gt_matrix, 0.01, 0.06, 1, 3)
         erro_item = FusionImage2(image1, image2, erro_matrix, bg_color)
         with global_idx.get_lock():
-            current_dataset_path = os.path.join(training_dataset_path, f"{global_idx.value}")
+            image_path = os.path.join(training_dataset_path, "image", f"{global_idx.value}.png")
             global_idx.value += 1
-        if not os.path.exists(current_dataset_path):
-            os.makedirs(current_dataset_path)
-        with open(os.path.join(current_dataset_path, "target.txt"), "w+") as f:
-            f.write("1 0\n")
-            cv2.imwrite(os.path.join(current_dataset_path, "state.png"), erro_item[0])
-        with open(os.path.join(current_dataset_path, "roi.txt"), "w+") as f:
-            f.write(f"{gt_item[3][0]} {gt_item[3][1]} {gt_item[3][2]} {gt_item[3][3]}\n")
+            with open(os.path.join(training_dataset_path, "target.txt"), "a+") as f:
+                f.write(f"1\n")
+        cv2.imwrite(image_path, erro_item[0])
+    
+    for _ in range(num_negatives//2):
+        erro_matrix = add_erro_to_rigid_transform_2d(gt_matrix, 0.08, 0.2, 2, 6)
+        erro_item = FusionImage2(image1, image2, erro_matrix, bg_color)
+        with global_idx.get_lock():
+            image_path = os.path.join(training_dataset_path, "image", f"{global_idx.value}.png")
+            global_idx.value += 1
+            with open(os.path.join(training_dataset_path, "target.txt"), "a+") as f:
+                f.write(f"0\n")
+        cv2.imwrite(image_path, erro_item[0])
+    
+    for _ in range(num_negatives//2):
+        erro_matrix = add_erro_to_rigid_transform_2d(gt_matrix, 0.1, 2, 2, 10)
+        erro_item = FusionImage2(image1, image2, erro_matrix, bg_color)
+        with global_idx.get_lock():
+            image_path = os.path.join(training_dataset_path, "image", f"{global_idx.value}.png")
+            global_idx.value += 1
+            with open(os.path.join(training_dataset_path, "target.txt"), "a+") as f:
+                f.write(f"0\n")
+        cv2.imwrite(image_path, erro_item[0])
             
 def create_dataset(raw_dataset_path, training_dataset_path, num_positives=1, num_negatives=4, processes=16):
     global global_idx
@@ -187,9 +194,10 @@ def create_dataset(raw_dataset_path, training_dataset_path, num_positives=1, num
 if __name__ == '__main__':
     raw_dataset_path = glob.glob(os.path.join("dataset", "raw_dataset", "*"))
     # raw_dataset_path = 'dataset/raw_dataset/MIT_ex'
-    num_positives = 10
-    num_negatives = 20
+    num_positives = 40
+    num_negatives = 50
     num_works = 80
-    training_dataset_path = 'dataset/training_dataset/std'
-    
+    training_dataset_path = 'dataset/training_dataset'
+    with open(os.path.join(training_dataset_path, "target.txt"), "w+") as f:
+        pass
     create_dataset(raw_dataset_path, training_dataset_path, num_positives, num_negatives, num_works)

@@ -4,7 +4,7 @@ This file save all of hyperparameters
 
 # NOTE: directory must end at '/', because we use this path to call external c++ program
 WorkSpacePath = {
-    "training_dataset_root": "/work/csl/code/piece/dataset/training_dataset",
+    "training_dataset_root": "/work/csl/code/piece/dataset/roi_dataset",
     "testing_dataset_root": "/work/csl/code/piece/dataset/test_dataset",
     "example_testing_root": "../Examples",
     "example_measure_root": "../Measure",
@@ -19,6 +19,6 @@ NNHyperparameters = {
     "batch_size": 64,
     "weight_decay": 1e-4,
     "learning_rate": 1e-4,
-    "total_training_step": 50000,
+    "total_training_step": 40000,
     "learner_num": 5
 }

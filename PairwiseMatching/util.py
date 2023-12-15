@@ -64,8 +64,6 @@ class Alignment2d:
         #         self.data[index].rank = rank + 1
 
 
-
-
 def calculate_euclidean_distance(point1, point2):
     '''
     Calculate the Euclidean distance between two points
