@@ -45,7 +45,7 @@ def train_loop(train_dataloader,model, device, epochs, batch_size, criterion, op
             # writer.add_scalar('Acc', acc / batch_size, global_step)
        
             # if global_step % 5000 == 0:
-            #     save_path = os.path.join(resume_checkpoint_dir, f'pit_s_dimodel_step{global_step}.pth')
+            #     save_path = os.path.join(resume_checkpoint_dir, f'pit_s_distilled_step{global_step}.pth')
             #     torch.save(model.state_dict(), save_path)
             global_step += 1
 
@@ -53,7 +53,7 @@ def train_loop(train_dataloader,model, device, epochs, batch_size, criterion, op
         logger.log(f'Learning Rate: {optimizer.param_groups[0]["lr"]} | Loss: {total_loss_train / len(train_dataloader) / batch_size: .6f} | Accuracy: {total_acc_train / len(train_dataloader) / batch_size: .5f}')
         writer.add_scalar('Accuracy', total_acc_train / len(train_dataloader) / batch_size, epoch)
         if (epoch + 1) % 1 == 0:
-            save_path = os.path.join(resume_checkpoint_dir, f'pit_s_dimodel_epoch{epoch+1}.pth')
+            save_path = os.path.join(resume_checkpoint_dir, f'pit_s_distilled_epoch{epoch+1}.pth')
             torch.save(model.state_dict(), save_path)
     return model
 

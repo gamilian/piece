@@ -135,7 +135,7 @@ def main():
         pretrained_cfg_file=args.pretrained_cfg_file,
         num_labels=2,
     ).to(device)
-    resume_checkpoint = os.path.join(args.resume_checkpoint_dir, "pit_s_dimodel_epoch2.pth")
+    resume_checkpoint = os.path.join(args.resume_checkpoint_dir, "pit_s_distilled_epoch2.pth")
     model.load_state_dict(torch.load(resume_checkpoint))
 
     fragments_dirs = glob(os.path.join(args.measure_data_root, "*_ex"))

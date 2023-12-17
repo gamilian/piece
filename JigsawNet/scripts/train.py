@@ -39,7 +39,7 @@ def main():
         pretrained_cfg_file=args.pretrained_cfg_file,
         num_labels=2
     ).to(device)
-    # resume_checkpoint = os.path.join(args.resume_checkpoint_dir, "pit_s_dimodel_epoch2.pth")
+    # resume_checkpoint = os.path.join(args.resume_checkpoint_dir, "pit_s_distilled_epoch2.pth")
     # model.load_state_dict(torch.load(resume_checkpoint))
     logger.log("creating data loader...")
     train_dataloader = get_train_dataloader(args.train_dataset_path, args.batch_size)
