@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import sys
 sys.path.append("/work/csl/code/piece/PairwiseMatching")
+
 from util import calculate_euclidean_distance, calculate_color_similarity, calculate_average_color
 
 def get_coutours(image, bg_color):

@@ -2,20 +2,18 @@ import torch
 import argparse
 import os, sys
 import cv2
-import dist_util
 import torch.nn.functional as F
 import numpy as np
 from torchvision import transforms
 from PIL import Image
 from glob import glob
-import my_logger as logger  
 
-from script_util import add_dict_to_argparser
 sys.path.append("/work/csl/code/piece/JigsawNet")
-
-import JigsawCNN.Utils as Utils
-from JigsawViT import JigsawViT
+from JigsawCNN import Utils
 from JigsawCNN.PairwiseAlignment2Image import FusionImage2
+from JiT import logger, dist_util 
+from JiT.JigsawViT import JigsawViT
+from JiT.script_util import add_dict_to_argparser
 
 transform = transforms.Compose([    
     transforms.Resize((224, 224)),  
@@ -88,6 +86,9 @@ def ValidatePathNet(alignments, gt_pose, fragments_dir, net, bg_color, device):
                 f.write("%d\t%d\t%f\t1\n" % (v1, v2, correct_probability))
                 f.write("%f %f %f\n%f %f %f\n0 0 1\n" % (trans[0, 0], trans[0, 1], trans[0, 2], trans[1, 0], trans[1, 1], trans[1, 2]))
     print(f'tp: {tp}, tn: {tn}, fp: {fp}, fn: {fn}')
+    print(f'accuracy: {(tp + tn) / (tp + tn + fp + fn)}')
+    print(f'precision: {tp / (tp + fp)}')
+    print(f'recall: {tp / (tp + fn)}')
 
 def meassure_pairwise(alignments, fragments_dir, net, bg_color, device):
     with open(os.path.join(fragments_dir, "filtered_alignments.txt"), 'w+') as f:
@@ -131,10 +132,10 @@ def main():
     logger.log(f"using device {device} ...")
     logger.log("create and load model ...")
     model = JigsawViT(
-        pretrained_model=args.pretrained_model,
+        pretrained_cfg_file=args.pretrained_cfg_file,
         num_labels=2,
     ).to(device)
-    resume_checkpoint = os.path.join(args.resume_checkpoint_dir, "model_epoch5.pth")
+    resume_checkpoint = os.path.join(args.resume_checkpoint_dir, "pit_s_dimodel_epoch2.pth")
     model.load_state_dict(torch.load(resume_checkpoint))
 
     fragments_dirs = glob(os.path.join(args.measure_data_root, "*_ex"))
@@ -164,8 +165,8 @@ def main():
 def create_argparser():
     defaults = dict(
         measure_data_root = "../Examples",
-        batch_size = 32,
-        pretrained_model = '/work/csl/code/piece/models/vit-base-patch16-224-in21k',
+        batch_size = 64,
+        pretrained_cfg_file = '/work/csl/code/piece/models/pit_s-distilled_224/model.safetensors',
         resume_checkpoint_dir="/work/csl/code/piece/checkpoints/JigsawVIT_checkpoint/",
         exp_name = "tmp"
     )

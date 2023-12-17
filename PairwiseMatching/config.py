@@ -14,7 +14,7 @@ with open (os.path.join(dataset_path, "bg_color.txt"), "r") as f:
 
 # crop_image_name = f"szp.png"
 
-log_path = os.path.join("log", f"{dataset}.log")
+log_path = os.path.join("logs", f"{dataset}.log")
 
 alignments_file = os.path.join(dataset_path, 'alignments.txt')
 

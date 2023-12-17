@@ -9,12 +9,11 @@ checkpoints/
 models/
 *.out
 *$py.class
-PairwiseMatching/__pycache__/
-PairwiseMatching/log/
+PairwiseMatching
 *.out
+logs/
 
-JigsawNet/ViT/__pycache__/
-JigsawNet/ViT/logs/
+JigsawNet/Measure
 # C extensions
 *.so
 

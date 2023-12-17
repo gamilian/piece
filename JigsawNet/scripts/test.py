@@ -1,14 +1,16 @@
 import torch
 import torch.nn as nn
 import argparse
-
-import dist_util
-from tqdm import tqdm
-import my_logger as logger
+import os
 from torch.utils.tensorboard import SummaryWriter  
-from JigsawViT import JigsawViT
-from dataload import get_test_dataloader
-from script_util import add_dict_to_argparser
+from tqdm import tqdm
+
+import sys
+sys.path.append("/work/csl/code/piece/JigsawNet")
+from JiT import dist_util, logger
+from JiT.JigsawViT import JigsawViT
+from JiT.dataload import get_test_dataloader
+from JiT.script_util import add_dict_to_argparser
 
 
 def predict(test_dataloader, model, device):
@@ -34,6 +36,9 @@ def predict(test_dataloader, model, device):
                         tn += 1
 
     print(f'tp: {tp}, tn: {tn}, fp: {fp}, fn: {fn}')
+    print(f'accuracy: {(tp + tn) / (tp + tn + fp + fn)}')
+    print(f'precision: {tp / (tp + fp)}')
+    print(f'recall: {tp / (tp + fn)}')
 
 
 def main():
@@ -44,10 +49,10 @@ def main():
     logger.log(f"using device {device} ...")
     logger.log("create and load model ...")
     model = JigsawViT(
-        pretrained_model=args.pretrained_model,
+        pretrained_cfg_file=args.pretrained_cfg_file,
         num_labels=2,
     ).to(device)
-    resume_checkpoint = os.path.join(args.resume_checkpoint_dir, "model_epoch5.pth")
+    resume_checkpoint = os.path.join(args.resume_checkpoint_dir, "pit_s_dimodel_epoch2.pth")
     model.load_state_dict(torch.load(resume_checkpoint))
 
     logger.log("creating data loader...")
@@ -61,8 +66,8 @@ def main():
 def create_argparser():
     defaults = dict(
         test_dataset_path = "/work/csl/code/piece/dataset/test_dataset",
-        batch_size = 64,
-        pretrained_model = '/work/csl/code/piece/models/vit-base-patch16-224-in21k',
+        batch_size = 256,
+        pretrained_cfg_file = '/work/csl/code/piece/models/pit_s-distilled_224/model.safetensors',
         resume_checkpoint_dir="/work/csl/code/piece/checkpoints/JigsawVIT_checkpoint",
         exp_name = "tmp"
     )
