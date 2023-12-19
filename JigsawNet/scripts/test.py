@@ -52,7 +52,7 @@ def main():
         pretrained_cfg_file=args.pretrained_cfg_file,
         num_labels=2,
     ).to(device)
-    resume_checkpoint = os.path.join(args.resume_checkpoint_dir, "pit_s_distilled_epoch2.pth")
+    resume_checkpoint = os.path.join(args.resume_checkpoint_dir, "pit_s_distilled_epoch3.pth")
     model.load_state_dict(torch.load(resume_checkpoint))
 
     logger.log("creating data loader...")

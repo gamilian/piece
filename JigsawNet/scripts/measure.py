@@ -38,14 +38,19 @@ def ValidatePathNet(alignments, gt_pose, fragments_dir, net, bg_color, device):
             pose1 = gt_pose.data[v1]
             pose2 = gt_pose.data[v2]
             gt_trans = np.matmul(np.linalg.inv(pose1), pose2)
-            err_trans = np.matmul(trans, np.linalg.inv(gt_trans))
-            if np.abs(err_trans[0, 0] - 1) < 1e-3:
-                err_trans[0, 0] = 1
-            if np.abs(err_trans[0, 0] + 1) < 1e-3:
-                err_trans[0, 0] = -1
-            theta = np.arccos(err_trans[0, 0]) * 180 / 3.1415926
-            translation_err = np.sqrt(err_trans[0, 2] ** 2 + err_trans[1, 2] ** 2)
-            if theta < r_err_threshold and translation_err < t_err_threshold:
+        
+            # err_trans = np.matmul(trans, np.linalg.inv(gt_trans))
+            # if np.abs(err_trans[0, 0] - 1) < 1e-3:
+            #     err_trans[0, 0] = 1
+            # if np.abs(err_trans[0, 0] + 1) < 1e-3:
+            #     err_trans[0, 0] = -1
+            # theta_err = np.arccos(err_trans[0, 0]) * 180 / 3.1415926
+            # translation_err = np.sqrt(err_trans[0, 2] ** 2 + err_trans[1, 2] ** 2)
+            # if theta_err < r_err_threshold and translation_err < t_err_threshold:
+
+            theta_err = np.abs(np.arccos(trans[0, 0]) * 180 / 3.1415926 - np.arccos(gt_trans[0, 0]) * 180 / 3.1415926)
+            translation_err = np.sqrt((trans[0, 2] - gt_trans[0, 2]) ** 2 + (trans[1, 2] - gt_trans[1, 2]) ** 2)
+            if theta_err < r_err_threshold and translation_err < t_err_threshold:
                 gt = 1
 
             # neural network judgement
@@ -66,25 +71,26 @@ def ValidatePathNet(alignments, gt_pose, fragments_dir, net, bg_color, device):
                 output = net(img.unsqueeze(0).to(device))
             output = F.softmax(output, dim=1).squeeze(0)
             correct_probability = output.tolist()[1]
-            if correct_probability > 0.8:
+            if correct_probability > 0.6:
                 final_class = 1
             else:
                 final_class = 0
         
             if final_class == gt and final_class == 1:
                 tp += 1
-                f.write("%d\t%d\t%f\t0\n" % (v1, v2, correct_probability))
-                f.write("%f %f %f\n%f %f %f\n0 0 1\n" % (trans[0, 0], trans[0, 1], trans[0, 2], trans[1, 0], trans[1, 1], trans[1, 2]))
+                f.write(f"{v1}\t{v2}\t{correct_probability}\t0\n")
+                f.write(f"{trans[0, 0]} {trans[0, 1]} {trans[0, 2]}\n{trans[1, 0]} {trans[1, 1]} {trans[1, 2]}\n0 0 1\n" )
             if final_class == gt and final_class == 0:
                 tn += 1
             if final_class != gt and final_class == 1:
                 fp += 1
-                f.write("%d\t%d\t%f\t1\n" % (v1, v2, correct_probability))
-                f.write("%f %f %f\n%f %f %f\n0 0 1\n" % (trans[0, 0], trans[0, 1], trans[0, 2], trans[1, 0], trans[1, 1], trans[1, 2]))
+                f.write(f"{v1}\t{v2}\t{correct_probability} {theta_err} {translation_err}\t1\n")
+                f.write(f"{trans[0, 0]} {trans[0, 1]} {trans[0, 2]}\n{trans[1, 0]} {trans[1, 1]} {trans[1, 2]}\n0 0 1\n" )
             if final_class != gt and final_class == 0:
                 fn += 1 
-                f.write("%d\t%d\t%f\t1\n" % (v1, v2, correct_probability))
-                f.write("%f %f %f\n%f %f %f\n0 0 1\n" % (trans[0, 0], trans[0, 1], trans[0, 2], trans[1, 0], trans[1, 1], trans[1, 2]))
+                f.write(f"{v1}\t{v2}\t{correct_probability} {theta_err} {translation_err}\t2\n")
+                f.write(f"{trans[0, 0]} {trans[0, 1]} {trans[0, 2]}\n{trans[1, 0]} {trans[1, 1]} {trans[1, 2]}\n0 0 1\n" )
+    
     print(f'tp: {tp}, tn: {tn}, fp: {fp}, fn: {fn}')
     print(f'accuracy: {(tp + tn) / (tp + tn + fp + fn)}')
     print(f'precision: {tp / (tp + fp)}')
@@ -118,10 +124,10 @@ def meassure_pairwise(alignments, fragments_dir, net, bg_color, device):
             output = F.softmax(output, dim=1).squeeze(0)
             probs = output.tolist()[1]
         
-            if probs > 0.6:
+            if probs > 0.5:
                 # cv2.imwrite(os.path.join(fragments_dir, "test" , f"fusion_{v1 + 1}_{v2 + 1}_{trans[0][0]}{trans[0][1]}_{correct_probability}.png"), item[0])
-                f.write("%d\t%d\t%f\t0\n" % (v1, v2, probs)) 
-                f.write("%f %f %f\n%f %f %f\n0 0 1\n" % (trans[0, 0], trans[0, 1], trans[0, 2], trans[1, 0], trans[1, 1], trans[1, 2]))
+                f.write(f"{v1}\t{v2}\t{probs}\t0\n")
+                f.write(f"{trans[0, 0]} {trans[0, 1]} {trans[0, 2]}\n{trans[1, 0]} {trans[1, 1]} {trans[1, 2]}\n0 0 1\n" )
     print("meanssure_pairwise complete!")
 
 def main():
@@ -135,7 +141,7 @@ def main():
         pretrained_cfg_file=args.pretrained_cfg_file,
         num_labels=2,
     ).to(device)
-    resume_checkpoint = os.path.join(args.resume_checkpoint_dir, "pit_s_distilled_epoch2.pth")
+    resume_checkpoint = os.path.join(args.resume_checkpoint_dir, "pit_s_distilled_epoch3.pth")
     model.load_state_dict(torch.load(resume_checkpoint))
 
     fragments_dirs = glob(os.path.join(args.measure_data_root, "*_ex"))
@@ -164,8 +170,8 @@ def main():
 
 def create_argparser():
     defaults = dict(
-        measure_data_root = "../Examples",
-        batch_size = 64,
+        measure_data_root = "../Measure",
+        batch_size = 256,
         pretrained_cfg_file = '/work/csl/code/piece/models/pit_s-distilled_224/model.safetensors',
         resume_checkpoint_dir="/work/csl/code/piece/checkpoints/JigsawVIT_checkpoint/",
         exp_name = "tmp"

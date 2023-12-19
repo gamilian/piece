@@ -9,7 +9,6 @@ checkpoints/
 models/
 *.out
 *$py.class
-PairwiseMatching
 *.out
 logs/
 

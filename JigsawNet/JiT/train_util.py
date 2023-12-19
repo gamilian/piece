@@ -1,11 +1,12 @@
 import random
 import numpy as np
 import os
+import time
 import torch
 import torch.nn as nn
 from tqdm import tqdm
 from torch.cuda.amp import autocast, GradScaler
-
+from JiT import logger
 
 def set_seed(seed=1):
     random.seed(seed)
@@ -21,7 +22,7 @@ def train_loop(train_dataloader,model, device, epochs, batch_size, criterion, op
         logger.log(f"Epoch{epoch + 1}:")
         total_acc_train = 0
         total_loss_train = 0.0
-        
+     
         for train_image, train_label in tqdm(train_dataloader):
             train_image = train_image.to(device)
             train_label = train_label.to(device)
@@ -33,7 +34,6 @@ def train_loop(train_dataloader,model, device, epochs, batch_size, criterion, op
             total_loss_train += loss.item()
             
             # scaler.scale(loss).backward()
-
             # # 使用 scaler 进行梯度更新
             # scaler.step(optimizer)
             # scaler.update()
