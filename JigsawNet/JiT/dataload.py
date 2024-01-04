@@ -2,7 +2,7 @@ import os
 import cv2
 import random
 import h5py
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, random_split 
 from torchvision.datasets import ImageFolder
 from torchvision import transforms
 from tqdm import tqdm
@@ -78,16 +78,19 @@ class HDF5Dataset(Dataset):
 
 def get_train_dataloader(root_folder, batch_size, prefetch_factor=4):
 
-    train_data = PieceDataset(root_folder)
-    train_data.shuffle_data()
+    data = PieceDataset(root_folder)
+    train_set_size, valid_set_size = int(0.9 * len(data)), len(data) - int(0.9 * len(data))
+    train_data, valid_data = random_split(data, [train_set_size, valid_set_size])
+
     train_dataloader = DataLoader(train_data, num_workers=16, batch_size=batch_size,
                                   shuffle=True, prefetch_factor=prefetch_factor)
-    return train_dataloader
-
+    valid_dataloader = DataLoader(valid_data, num_workers=8, batch_size=batch_size,
+                                shuffle=False, prefetch_factor=prefetch_factor)
+    return train_dataloader, valid_dataloader
 
 def get_test_dataloader(root_folder, batch_size, prefetch_factor=2):
     test_data = PieceDataset(root_folder)
-    test_dataloader = DataLoader(test_data, num_workers=16, batch_size=batch_size,
+    test_dataloader = DataLoader(test_data, num_workers=8, batch_size=batch_size,
                                  shuffle=False, prefetch_factor=prefetch_factor)
     return test_dataloader
 

@@ -7,8 +7,8 @@ from image_process import fusion_image, calculate_transform_matrix, calculate_pr
 
 if __name__ == '__main__':
     # 背景颜色
-    bg_color = [232, 8, 248]
-    # bg_color = [8, 248, 8]
+    # bg_color = [232, 8, 248]
+    bg_color = [8, 248, 8]
     dataset = "BGU_ex"
     # 读取图片
     path1 = f"{dataset}/fragment_{str(1).rjust(4, '0')}.png"

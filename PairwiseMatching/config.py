@@ -1,6 +1,6 @@
 import os
 
-dataset = "BGU_ex"
+dataset = "HUST_ex"
 dataset_path = os.path.join("/work/csl/code/piece/dataset/", dataset)
 
 
@@ -18,4 +18,4 @@ log_path = os.path.join("logs", f"{dataset}.log")
 
 alignments_file = os.path.join(dataset_path, 'alignments.txt')
 
-num_processes = 32
+num_processes = 64

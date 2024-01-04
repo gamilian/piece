@@ -39,33 +39,36 @@ def main():
     writer = SummaryWriter(args.tensorboard_dir)
 
     logger.log("creating tensorboard_dir and model ...")
+
     model = JigsawViT(
         pretrained_cfg_file=args.pretrained_cfg_file,
         num_labels=2
     ).to(device)
+    
     # resume_checkpoint = os.path.join(
-    #     args.resume_checkpoint_dir, "pit_s_distilled_epoch1.pth")
+    #     args.resume_checkpoint_dir, "cross_vit_epoch4.pth")
+    # logger.log(f"load checkpoint: {resume_checkpoint}...")
     # model.load_state_dict(torch.load(resume_checkpoint))
     logger.log("creating data loader...")
-    train_dataloader = get_train_dataloader(
+    train_dataloader, valid_dataloader = get_train_dataloader(
         args.train_dataset_path, args.batch_size)
     criterion = nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
-    scheduler = CosineAnnealingLR(optimizer, T_max=50)
+    lr_scheduler = CosineAnnealingLR(optimizer, T_max=50)
     logger.log("training...")
-    train_loop(train_dataloader=train_dataloader, model=model, device=device, epochs=args.epochs, batch_size=args.batch_size,
-               criterion=criterion, optimizer=optimizer, scheduler=scheduler, writer=writer, resume_checkpoint_dir=args.resume_checkpoint_dir)
+    train_loop(train_dataloader=train_dataloader, valid_dataloader=valid_dataloader, model=model, device=device, epochs=args.epochs, batch_size=args.batch_size,
+               criterion=criterion, optimizer=optimizer, lr_scheduler=lr_scheduler, writer=writer, resume_checkpoint_dir=args.resume_checkpoint_dir)
 
     logger.log("done.")
 
 
 def create_argparser():
     defaults = dict(
-        train_dataset_path="/work/csl/code/piece/dataset/training_dataset",
-        lr=1e-4,
-        epochs=5,
-        batch_size=128,
-        pretrained_cfg_file='/work/csl/code/piece/models/pit_s-distilled_224/model.safetensors',
+        train_dataset_path="/work/csl/code/piece/dataset/mitbgu_dataset",
+        lr=1e-5,
+        epochs=20,
+        batch_size=32,
+        pretrained_cfg_file='/work/csl/code/piece/models/crossvit_base_240/model.safetensors',
         resume_checkpoint_dir="/work/csl/code/piece/checkpoints/JigsawVIT_checkpoint/",
         tensorboard_dir="logs/tensorboard",
         exp_name="tmp"

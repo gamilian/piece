@@ -69,7 +69,7 @@ def process_image_pair(args):
         if fusion_image(image1, image2, matrix, bg_color)[1] < 0.05:
             score = calculate_prob(image1, image2, segments_si1, segments_si2,
                                     matrix)
-            if score > 150:
+            if score > 50:
                 # prob_matrix.append(matrix1)
                 # prb_score.append(score1)
                 points1, points2 = contours1[0].squeeze(1), contours2[0].squeeze(1)[::-1]
