@@ -5,7 +5,6 @@ from tqdm import tqdm
 import logging
 import time
 from multiprocessing import Pool, Lock, Value
-import config
 from coutours_process import *
 from image_process import *
 from util import *
@@ -18,7 +17,7 @@ from PairwiseAlignment2Image import FusionImage2
 write_lock = Lock()
 # 进程池全局共享变量
 global_idx = Value('i', 0)
-
+t = Value('i', 0)
 
 def process_image_pair(path, i, j, bg_color, training_dataset_path, gt_trans, num_negatives):
     image1 = cv2.imread(os.path.join(path, f"fragment_{i + 1:04d}.png"))
@@ -38,8 +37,8 @@ def process_image_pair(path, i, j, bg_color, training_dataset_path, gt_trans, nu
     # prob_matrix, prb_score = [], []
     r_err_threshold, t_err_threshold = 4, 50
     for k in range(len(match_segments1)):
-        # if k >= num_negatives:
-        #     break
+        if k >= num_negatives:
+            break
         matrix = calculate_transform_matrix(
             match_segments1[k], match_segments2[k])
         trans = np.matrix([[matrix[0, 0], matrix[1, 0], matrix[1, 2]],
@@ -84,8 +83,8 @@ def erro_generate(path, i, j, bg_color, training_dataset_path, num_negatives):
         image1, image2, segments_si1, segments_si2)
     # prob_matrix, prb_score = [], []
     for k in range(len(match_segments1)):
-        # if k >= num_negatives//2:
-        #     break
+        if k >= num_negatives//8:
+            break
         matrix = calculate_transform_matrix(
             match_segments1[k], match_segments2[k])
         matrix = [[matrix[0, 0], matrix[1, 0], matrix[1, 2]],
@@ -191,8 +190,7 @@ def add_erro_to_rigid_transform_2d(matrix, angle_noise_mean, angle_noise_varianc
 
 def process_path(args):
     global global_idx
-    if global_idx.value >= 2000000:
-        return
+    global t
     path, i, j, gt_pose, bg_color, training_dataset_path, num_positives, num_negatives = args
 
     image1 = cv2.imread(os.path.join(path, f"fragment_{i + 1:04d}.png"))
@@ -223,9 +221,9 @@ def process_path(args):
                 f.write(f"1\n")
         cv2.imwrite(image_path, noise_item[0])
 
-    for _ in range(num_positives//2):
+    for _ in range(num_positives):
         erro_matrix = add_uniform_noise_to_rigid_transform_2d(
-            gt_matrix, 0.03, 0.06, 4, 30)
+            gt_matrix, 0.03, 0.06, 4, 25)
         erro_item = FusionImage2(image1, image2, erro_matrix, bg_color)
         with global_idx.get_lock():
             image_path = os.path.join(
@@ -235,18 +233,19 @@ def process_path(args):
                 f.write(f"1\n")
         cv2.imwrite(image_path, erro_item[0])
 
-    # for _ in range(num_negatives//4):
-    #     erro_matrix = add_erro_to_rigid_transform_2d(
-    #         gt_matrix, 0.1, 0.3, 4, 10)
-    #     erro_item = FusionImage2(image1, image2, erro_matrix, bg_color)
-    #     with global_idx.get_lock():
-    #         image_path = os.path.join(
-    #             training_dataset_path, "image", f"{global_idx.value}.png")
-    #         global_idx.value += 1
-    #         with open(os.path.join(training_dataset_path, "target.txt"), "a+") as f:
-    #             f.write(f"0\n")
-    #     cv2.imwrite(image_path, erro_item[0])
-    # search_pairwise_match_candidates
+    for _ in range(num_negatives//8):
+        erro_matrix = add_uniform_noise_to_rigid_transform_2d(
+            gt_matrix, 0.07, 0.12, 20, 50)
+        erro_item = FusionImage2(image1, image2, erro_matrix, bg_color)
+        with global_idx.get_lock():
+            image_path = os.path.join(
+                training_dataset_path, "image", f"{global_idx.value}.png")
+            global_idx.value += 1
+            with open(os.path.join(training_dataset_path, "target.txt"), "a+") as f:
+                f.write(f"0\n")
+        cv2.imwrite(image_path, erro_item[0])
+
+  
     process_image_pair(path, i, j, bg_color, training_dataset_path, gt_matrix, num_negatives)
 
 
@@ -265,7 +264,6 @@ def create_dataset(raw_dataset_path, training_dataset_path, num_positives=1, num
                 args_list.append((path, i, j, gt_pose, bg_color,
                                  training_dataset_path, num_positives, num_negatives))
 
-    # args_list = [args_list[4]]
     total_tasks = len(args_list)
     print(f"create dataset, total_tasks: {total_tasks}")
     with Pool(processes=processes) as pool:
@@ -276,14 +274,15 @@ def create_dataset(raw_dataset_path, training_dataset_path, num_positives=1, num
 
 
 if __name__ == '__main__':
-    raw_dataset_path = glob.glob(os.path.join("/work/csl/code/piece/dataset/raw_dataset", "*_*"))
-    # raw_dataset_path = glob.glob(os.path.join(
-    #     "/work/csl/code/piece/dataset/", "*_ex"))
-    num_positives = 50
-    num_negatives = 50
+    raw_dataset_path = glob.glob(os.path.join("/work/csl/code/piece/dataset/puzzles", "*"))
+    # raw_dataset_path = glob.glob(os.path.join("/work/csl/code/piece/dataset/raw_dataset", "*_*"))
+    # raw_dataset_path = glob.glob(os.path.join("/work/csl/code/piece/dataset/", "6*"))
+    num_positives = 1000
+    num_negatives = 520
     num_works = 64
     # print(raw_dataset_path)
-    training_dataset_path = '/work/csl/code/piece/dataset/mitbgu_dataset'
+    training_dataset_path = '/work/csl/code/piece/dataset/szp_train_dataset'
+    # training_dataset_path = '/work/csl/code/piece/dataset/tmp_test'
     with open(os.path.join(training_dataset_path, "target.txt"), "w+") as f:
         pass
     create_dataset(raw_dataset_path, training_dataset_path,

@@ -64,39 +64,40 @@ def process_image_pair(args):
     # prob_matrix, prb_score = [], []
     
     for k in range(len(match_segments1)):
-        matrix = calculate_transform_matrix(match_segments1[k], match_segments2[k])
+        matrix1 = calculate_transform_matrix(match_segments1[k], match_segments2[k])
+        # matrix2 = calculate_transform_matrix(match_segments1[k], match_segments2[k][::-1])
 
-        if fusion_image(image1, image2, matrix, bg_color)[1] < 0.05:
+        if fusion_image(image1, image2, matrix1, bg_color)[1] < 0.05:
             score = calculate_prob(image1, image2, segments_si1, segments_si2,
-                                    matrix)
-            if score > 50:
+                                    matrix1, 1.5)
+            if score > 100:
                 # prob_matrix.append(matrix1)
                 # prb_score.append(score1)
                 points1, points2 = contours1[0].squeeze(1), contours2[0].squeeze(1)[::-1]
-                lcs1, lcs2 = longest_common_subsequence(points1, points2, matrix, 2)
+                lcs1, lcs2 = longest_common_subsequence(points1, points2, matrix1, 2)
                 cloud1, cloud2 = np.array([points1[i] for i in lcs1]), np.array([points2[i] for i in lcs2])
-                cloud2_transformed = np.dot(np.column_stack((cloud2, np.ones(len(cloud2)))), matrix.T)[:, :2]
+                cloud2_transformed = np.dot(np.column_stack((cloud2, np.ones(len(cloud2)))), matrix1.T)[:, :2]
                 final_transform = icp(cloud1, cloud2_transformed)
-                final_transform = np.matmul(final_transform, matrix)
-                final_score = int(calculate_prob(image1, image2, segments_si1, segments_si2, final_transform))
+                final_transform = np.matmul(final_transform, matrix1)
+                final_score = int(calculate_prob(image1, image2, segments_si1, segments_si2, final_transform, 1.5))
                 # lcs1, lcs2 = longest_common_continuous_subsequence_circular(points1, points2, final_transform, 4)
                 # cloud2 = np.array([points2[i] for i in lcs2])
                 points = cloud2[::-1]
                 # offset_maxtrix = fusion_image(image1, image2, matrix, bg_color)[2]
                 # line = np.dot(np.column_stack((line, np.ones(len(line)))), offset_maxtrix.T)[:, :2]
-                logging.info(f"lock the write mutex")
-                with write_lock:
-                    with open(config.alignments_file, "a+", encoding='utf-8') as f:
-                        f.write(f"{i-1} {j-1} {final_score} ")
-                        # f.write("%f %f %f %f %f %f 0.000000 0.000000 1.000000 line" % (
-                        #     final_transform[0, 0], final_transform[0, 1], final_transform[0, 2], final_transform[1, 0], final_transform[1, 1],
-                        #     final_transform[1, 2]))
-                        f.write("%f %f %f %f %f %f 0.000000 0.000000 1.000000 line" % (
-                            final_transform[0, 0], final_transform[1, 0], final_transform[1, 2], final_transform[0, 1], final_transform[1, 1],
-                            final_transform[0, 2]))
-                        for point in points:
-                            f.write(f" {point[0]} {point[1]}")
-                        f.write(f"\n")
+                if final_score > 200:
+                    with write_lock:
+                        with open(config.alignments_file, "a+", encoding='utf-8') as f:
+                            f.write(f"{i-1} {j-1} {final_score} ")
+                            # f.write("%f %f %f %f %f %f 0.000000 0.000000 1.000000 line" % (
+                            #     final_transform[0, 0], final_transform[0, 1], final_transform[0, 2], final_transform[1, 0], final_transform[1, 1],
+                            #     final_transform[1, 2]))
+                            f.write("%f %f %f %f %f %f 0.000000 0.000000 1.000000 line" % (
+                                final_transform[0, 0], final_transform[1, 0], final_transform[1, 2], final_transform[0, 1], final_transform[1, 1],
+                                final_transform[0, 2]))
+                            # for point in points:
+                            #     f.write(f" {point[0]} {point[1]}")
+                            f.write(f"\n")
         
 
     t2 = time.time()

@@ -64,10 +64,10 @@ def main():
 
 def create_argparser():
     defaults = dict(
-        train_dataset_path="/work/csl/code/piece/dataset/mitbgu_dataset",
+        train_dataset_path="/work/csl/code/piece/dataset/szp_training_dataset",
         lr=1e-5,
         epochs=20,
-        batch_size=32,
+        batch_size=64,
         pretrained_cfg_file='/work/csl/code/piece/models/crossvit_base_240/model.safetensors',
         resume_checkpoint_dir="/work/csl/code/piece/checkpoints/JigsawVIT_checkpoint/",
         tensorboard_dir="logs/tensorboard",

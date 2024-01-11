@@ -138,7 +138,7 @@ def main():
         num_labels=2
     ).to(device)
     logger.log("load resume_checkpoint ...")
-    resume_checkpoint = os.path.join(args.resume_checkpoint_dir, "pit_s_distilled_epoch20.pth")
+    resume_checkpoint = os.path.join(args.resume_checkpoint_dir, "cross_vit_epoch6.pth")
     model.load_state_dict(torch.load(resume_checkpoint))
 
     fragments_dirs = glob(os.path.join(args.measure_data_root, "*_ex"))
@@ -155,7 +155,7 @@ def main():
                     bg_color = bg_color[::-1]
     
         relative_alignment = os.path.join(fragments_dirs[i], "alignments.txt")
-        gt_pose_path = os.path.join(fragments_dirs[i], "groundTruth.txt")
+        gt_pose_path = os.path.join(fragments_dirs[i], "ground_truth.txt")
         
         alignments = Utils.Alignment2d(relative_alignment)
         if (os.path.exists(gt_pose_path)):
@@ -169,7 +169,7 @@ def create_argparser():
     defaults = dict(
         measure_data_root = "../Measure",
         batch_size = 128,
-        pretrained_cfg_file='/work/csl/code/piece/models/pit_s-distilled_224/model.safetensors',
+        pretrained_cfg_file='/work/csl/code/piece/models/crossvit_base_240/model.safetensors',
         resume_checkpoint_dir = "/work/csl/code/piece/checkpoints/JigsawVIT_checkpoint/",
         exp_name = "tmp"
     )

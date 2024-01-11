@@ -82,7 +82,7 @@ def get_train_dataloader(root_folder, batch_size, prefetch_factor=4):
     train_set_size, valid_set_size = int(0.9 * len(data)), len(data) - int(0.9 * len(data))
     train_data, valid_data = random_split(data, [train_set_size, valid_set_size])
 
-    train_dataloader = DataLoader(train_data, num_workers=16, batch_size=batch_size,
+    train_dataloader = DataLoader(train_data, num_workers=64, batch_size=batch_size,
                                   shuffle=True, prefetch_factor=prefetch_factor)
     valid_dataloader = DataLoader(valid_data, num_workers=8, batch_size=batch_size,
                                 shuffle=False, prefetch_factor=prefetch_factor)
