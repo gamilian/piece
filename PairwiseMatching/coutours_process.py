@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import sys
-sys.path.append("/work/csl/code/piece/PairwiseMatching")
+sys.path.append("/data/csl/code/piece/PairwiseMatching")
 
 from util import calculate_euclidean_distance, calculate_color_similarity, calculate_average_color
 
@@ -40,9 +40,6 @@ def approx_contours(image, contour, beta=0.0008):
                 v1, v2 = i, j
     # print(f"v1:{contour[v1][0]}\nv2:{contour[v2][0]}\n")
 
-    # The best accuracy parameter is about 0.0004
-    epsilon = beta * cv2.arcLength(contour, True)
-
     if v1 < v2:
         # Extract the contour of the v1v2 interval
         v1v2_contour = contour[v1:v2 + 1]  
@@ -53,10 +50,13 @@ def approx_contours(image, contour, beta=0.0008):
         v1v2_contour = np.concatenate(contour[v1:], contour[:v2 + 1])
         # Extract the contour of the v2v1 interval
         v2v1_contour = contour[v2 + 1:v1]
+
+    epsilon12 = beta * cv2.arcLength(v1v2_contour, True)
+    epsilon21 = beta * cv2.arcLength(v2v1_contour, True)
     # Execute the DP algorithm on v1 to v2
-    dp_v1v2 = cv2.approxPolyDP(v1v2_contour, epsilon, closed=True)  
+    dp_v1v2 = cv2.approxPolyDP(v1v2_contour, epsilon12, closed=True)  
     # Execute the DP algorithm on v2 to v1
-    dp_v2v1 = cv2.approxPolyDP(v2v1_contour, epsilon, closed=True)
+    dp_v2v1 = cv2.approxPolyDP(v2v1_contour, epsilon21, closed=True)
     # Combine the two contours  
     approx = np.concatenate((dp_v1v2, dp_v2v1))
     # Plot Approximate Contour Points
@@ -79,8 +79,9 @@ def split_contours(contour, approx):
     num_seg = len(approx)
     contour = np.squeeze(contour, axis=1)
     approx = np.squeeze(approx, axis=1)
+     
     for i, point in enumerate(contour):
-        mmp.update({tuple(point): i})
+        mmp[tuple(point)] = i
 
     st, ed, i = 0, 0, 0
     while i < num_seg:
@@ -145,8 +146,8 @@ def split_color(image, segments_si):
 def search_match_segments(img_1, img_2, segments_si1, segments_si2):
     point_cloud_1 = []
     point_cloud_2 = []
-    length_threshold = 4
-    color_thresshold = 0.9
+    length_threshold = 3
+    color_thresshold = 0.98
     # 遍历每个片段Si
     for segment1_si in segments_si1:
         # 初始化当前片段si的第一个段sik

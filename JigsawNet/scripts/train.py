@@ -1,13 +1,14 @@
+import sys
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 from torch.utils.tensorboard import SummaryWriter
 from torch.optim.lr_scheduler import CosineAnnealingLR
 import torch.nn as nn
 import torch
 import argparse
 import shutil
-import sys
-import os
 
-sys.path.append("/work/csl/code/piece/JigsawNet")
+sys.path.append("/data/csl/code/piece/JigsawNet")
 from JiT.script_util import add_dict_to_argparser
 from JiT.dataload import get_train_dataloader
 from JiT.JigsawViT import JigsawViT
@@ -17,11 +18,15 @@ from JiT import dist_util, logger, dataload
 
 
 def main():
+    print(torch.cuda.device_count())
     print("set_seed")
     set_seed(1)
     args = create_argparser().parse_args()
     dist_util.setup_dist()
     device = dist_util.dev()
+    print(torch.cuda.device_count())
+    
+    # device = torch.device("cuda:0")
     logger.configure(dir=f'logs/{args.exp_name}')
     logger.log(f"using device {device} ...")
 
@@ -46,7 +51,7 @@ def main():
     ).to(device)
     
     # resume_checkpoint = os.path.join(
-    #     args.resume_checkpoint_dir, "cross_vit_epoch4.pth")
+    #     args.resume_checkpoint_dir, "pit_s-distilled_224_epoch1.pth")
     # logger.log(f"load checkpoint: {resume_checkpoint}...")
     # model.load_state_dict(torch.load(resume_checkpoint))
     logger.log("creating data loader...")
@@ -64,12 +69,12 @@ def main():
 
 def create_argparser():
     defaults = dict(
-        train_dataset_path="/work/csl/code/piece/dataset/szp_training_dataset",
+        train_dataset_path="/data/csl/dataset/jigsaw_dataset/szp_train_roi",
         lr=1e-5,
-        epochs=20,
-        batch_size=64,
-        pretrained_cfg_file='/work/csl/code/piece/models/crossvit_base_240/model.safetensors',
-        resume_checkpoint_dir="/work/csl/code/piece/checkpoints/JigsawVIT_checkpoint/",
+        epochs=10,
+        batch_size=256,
+        pretrained_cfg_file='/data/csl/code/piece/models/pit_s-distilled_224/model.safetensors',
+        resume_checkpoint_dir="/data/csl/code/piece/checkpoints/JigsawVIT_checkpoint/",
         tensorboard_dir="logs/tensorboard",
         exp_name="tmp"
     )

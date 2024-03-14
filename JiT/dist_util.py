@@ -26,7 +26,7 @@ def setup_dist():
     if dist.is_initialized():
         return
     ## temporary removed to manually set the CUDA_VISIBLE_DEVICES
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1"#f"{MPI.COMM_WORLD.Get_rank() % GPUS_PER_NODE}"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"#f"{MPI.COMM_WORLD.Get_rank() % GPUS_PER_NODE}"
 
     comm = MPI.COMM_WORLD
     backend = "gloo" if not torch.cuda.is_available() else "nccl"
@@ -49,8 +49,8 @@ def dev():
     Get the device to use for torch.distributed.
     """
     if torch.cuda.is_available():
-        return torch.device(f"cuda:{MPI.COMM_WORLD.Get_rank()}")
-        # return torch.device(f"cuda")
+        # return torch.device(f"cuda:{MPI.COMM_WORLD.Get_rank()}")
+        return torch.device(f"cuda")
     return torch.device("cpu")
 
 

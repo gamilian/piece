@@ -88,13 +88,14 @@ class Alignment2d:
         self.mapIdpairRank2Transform = {}
         # for example, {0: [0,1,2,100]} means from 0 to find data[0,1,2,100] in which either 0-x or x-0
         self.id2Transform = {}
+        self.node_num = 0
 
         with open(relative_transform_filename) as f:
             all_line = [line.rstrip() for line in f]
-            node_num = 0
+            self.node_num = 0
             for line in all_line:
                 if line[0:4] == "Node":
-                    node_num += 1
+                    self.node_num += 1
                 else:
                     data_str_list = line.split()
                     v1,v2,score, m1,m2,m3,m4,m5,m6,m7,m8,m9 = [t(s) for t,s in zip((int,int, float, float,float,float,float,float,float,float,float,float), data_str_list[0:12])]
@@ -310,7 +311,3 @@ def calculatePoseErr(gt_pose, pose):
 
     return [r_err, t_err]
 
-
-if __name__ == '__main__':
-    relative_transform_filename = "/work/csl/code/piece/JigsawNet/Evaluate/szp_ex/alignments.txt"
-    Alignment2d(relative_transform_filename)

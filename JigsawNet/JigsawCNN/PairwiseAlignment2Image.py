@@ -229,7 +229,7 @@ def FusionImage2(src, dst, transform, bg_color=[0,0,0]):
     new_min_col_ratio = min_roi_col/cols
     new_max_row_ratio = max_roi_row/rows
     new_max_col_ratio = max_roi_col/cols
-    roi = (new_min_row_ratio, new_min_col_ratio, new_max_row_ratio, new_max_col_ratio)
+    roi = (new_min_col_ratio, new_min_row_ratio, new_max_col_ratio, new_max_row_ratio)
 
 
     c = np.logical_and(a, b)

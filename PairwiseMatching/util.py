@@ -108,7 +108,7 @@ def transform_cloud(cloud, transform):
     transformed_cloud = (transform@(cloud_homogeneous.T)).T
     return transformed_cloud[:, :2]
 
-def tranform_ponit(point, transform):
+def tranform_point(point, transform):
     '''
     Apply a rigid transformation to a point
     '''
@@ -135,7 +135,7 @@ def longest_common_subsequence(cloud1, cloud2, transform, threshold=2):
         for j in range(1, n + 1):
             # t = compute_color_similarity(image1[cloud1[i - 1][1]][cloud1[i - 1][0]],
             #                             image2[cloud2[j - 1][1]][cloud2[j - 1][0]])
-            t = calculate_euclidean_distance(cloud1[i - 1], tranform_ponit(cloud2[j - 1], transform))
+            t = calculate_euclidean_distance(cloud1[i - 1], tranform_point(cloud2[j - 1], transform))
             if t <= threshold:
                 dp[i][j] = dp[i - 1][j - 1] + 1
             else:
@@ -147,7 +147,7 @@ def longest_common_subsequence(cloud1, cloud2, transform, threshold=2):
     while i > 0 and j > 0:
         # if compute_color_similarity(image1[cloud1[i - 1][1]][cloud1[i - 1][0]],
         #                                 image2[cloud2[j - 1][1]][cloud2[j - 1][0]]) >= threshold:
-        t = calculate_euclidean_distance(cloud1[i - 1], tranform_ponit(cloud2[j - 1], transform))
+        t = calculate_euclidean_distance(cloud1[i - 1], tranform_point(cloud2[j - 1], transform))
         if t <= threshold:
             lcs1.append(i - 1)
             lcs2.append(j - 1)
@@ -173,7 +173,7 @@ def longest_common_continuous_subsequence_circular(cloud1, cloud2, transform, th
     for i in range(1, 2 * m + 1):
         break_flag = False
         for j in range(1, 2 * n + 1):
-            t = calculate_euclidean_distance(cloud1[(i - 1) % m], tranform_ponit(cloud2[(j - 1) % n], transform))
+            t = calculate_euclidean_distance(cloud1[(i - 1) % m], tranform_point(cloud2[(j - 1) % n], transform))
             if t <= threshold:
                 dp[i][j] = dp[i - 1][j - 1] + 1
                 # Ensure we are not exceeding the original length of the sequences

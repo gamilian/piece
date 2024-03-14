@@ -6,7 +6,7 @@ const int Parameters::beam_width = 1024;
 const double Parameters::T_err_threshold_ = 50;
 const double Parameters::R_err_threshold_ = 4;
 const int Parameters::overlapped_pixels_threshold_ = 1500;
-const double Parameters::intersection_ratio_threshold_ = 0.1;
+const double Parameters::intersection_ratio_threshold_ = 0.12;
 const double Parameters::top2bottom_greedy_score_threshold_ = 0.8;
 
 const int Parameters::total_loop_num = 200;

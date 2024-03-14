@@ -1,10 +1,5 @@
 import argparse
 
-def update_arg_parser(args):
-    args.num_channels = 256
-    args.input_channels = 2
-    args.out_channels = 3
-
 def add_dict_to_argparser(parser, default_dict):
     for k, v in default_dict.items():
         v_type = type(v)

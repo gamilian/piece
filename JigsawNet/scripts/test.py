@@ -1,12 +1,14 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 import torch
 import torch.nn as nn
 import argparse
-import os
+
 from torch.utils.tensorboard import SummaryWriter  
 from tqdm import tqdm
 
 import sys
-sys.path.append("/work/csl/code/piece/JigsawNet")
+sys.path.append("/data/csl/code/piece/JigsawNet")
 from JiT import dist_util, logger
 from JiT.JigsawViT import JigsawViT
 from JiT.dataload import get_test_dataloader
@@ -52,7 +54,7 @@ def main():
         pretrained_cfg_file=args.pretrained_cfg_file,
         num_labels=2,
     ).to(device)
-    resume_checkpoint = os.path.join(args.resume_checkpoint_dir, "cross_vit_epoch4.pth")
+    resume_checkpoint = os.path.join(args.resume_checkpoint_dir, "pit_s-distilled_epoch10.pth")
     model.load_state_dict(torch.load(resume_checkpoint))
 
     logger.log("creating data loader...")
@@ -65,10 +67,10 @@ def main():
 
 def create_argparser():
     defaults = dict(
-        test_dataset_path = "/work/csl/code/piece/dataset/test_dataset2",
+        test_dataset_path = "/data/csl/dataset/jigsaw_dataset/szp_test_roi",
         batch_size = 128,
-        pretrained_cfg_file='/work/csl/code/piece/models/crossvit_base_240/model.safetensors',
-        resume_checkpoint_dir="/work/csl/code/piece/checkpoints/JigsawVIT_checkpoint",
+        pretrained_cfg_file='/data/csl/code/piece/models/pit_s-distilled_224/model.safetensors',
+        resume_checkpoint_dir="/data/csl/code/piece/checkpoints/JigsawVIT_checkpoint",
         exp_name = "tmp"
     )
     parser = argparse.ArgumentParser()

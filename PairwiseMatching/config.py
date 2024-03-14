@@ -1,7 +1,7 @@
 import os
 
-dataset = "6"
-dataset_path = os.path.join("/work/csl/code/piece/dataset/", dataset)
+dataset = "szp200_ex"
+dataset_path = os.path.join("/data/csl/dataset/jigsaw_dataset", dataset)
 
 
 num_fragment = 0
@@ -16,6 +16,6 @@ with open (os.path.join(dataset_path, "bg_color.txt"), "r") as f:
 
 log_path = os.path.join("logs", f"{dataset}.log")
 
-alignments_file = os.path.join(dataset_path, 'alignments.txt')
+alignments_file = os.path.join(dataset_path, 'alignments_tmp.txt')
 
-num_processes = 32
+num_processes = 50

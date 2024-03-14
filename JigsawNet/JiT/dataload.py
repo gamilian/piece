@@ -25,6 +25,7 @@ class PieceDataset(Dataset):
 
     def load_data(self):
         data = []
+        rois = []
         image_path_root = os.path.join(self.root_folder, 'image')
         with open(os.path.join(self.root_folder, "target.txt")) as f:
             for i, line in enumerate(f):
@@ -34,6 +35,7 @@ class PieceDataset(Dataset):
                 label = int(line)
                 image_path = os.path.join(image_path_root, f"{i}.png")
                 data.append((image_path, label))
+   
         return data
 
     def __len__(self):
@@ -96,7 +98,7 @@ def get_test_dataloader(root_folder, batch_size, prefetch_factor=2):
 
 
 if __name__ == '__main__':
-    root_folder = '/work/csl/code/piece/dataset/12_17'
+    root_folder = '/data/csl/dataset/jigsaw_dataset/12_17'
     data = PieceDataset(root_folder)
     # joblib.dump(train_data, 'dataset_object.pkl')
     data.shuffle_data()

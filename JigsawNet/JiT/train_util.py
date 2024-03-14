@@ -82,7 +82,7 @@ def train_loop(train_dataloader, valid_dataloader, model, device, epochs, batch_
         writer.add_scalar('Accuracy', total_acc_train / len(train_dataloader) / batch_size, epoch)
         
         if (epoch + 1) % 1 == 0:
-            save_path = os.path.join(resume_checkpoint_dir, f'cross_vit_epoch{epoch+1}.pth')
+            save_path = os.path.join(resume_checkpoint_dir, f'pit_s-distilled_epoch{epoch+1}.pth')
             torch.save(model.state_dict(), save_path)
 
         logger.log(f"save model to {save_path}")

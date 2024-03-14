@@ -54,7 +54,7 @@ std::unordered_map<int, cv::Mat> JigsawOpt2::OptWithInterSec(const std::vector<C
 		multiGraph_.edges_[edge_id].select_ = true;
 		multiGraph_.mapIdPair2EdgeIds_[IdPair(edge.frame1_, edge.frame2_)].selectId = edge_id;
 	}
-
+	std::cout << "Finish modify the multi-graph " 
 	// prepare final result
 	std::vector<Eigen::Matrix3d, Eigen::aligned_allocator<Eigen::Matrix3d>> all_fragment_poses(multiGraph_.vertexNum_, Eigen::Matrix3d::Identity());
 	for(auto& pose: loop_closures[best_id].poses_)
@@ -63,10 +63,11 @@ std::unordered_map<int, cv::Mat> JigsawOpt2::OptWithInterSec(const std::vector<C
 		Eigen::Matrix3d pose_mat = pose.second;
 		all_fragment_poses[id] = pose_mat;
 	}
-
+	std::cout << "Finish prepare final result " 
 	std::vector<int> out_vertex2set;
 	CUDAImgIntersectionDetector intersection_detector;
 	std::unordered_map<int, cv::Mat> final_reassembly = intersection_detector.UnionFindSetSelectNoIntersection(multiGraph_, loop_closures[best_id], all_fragment_images, all_fragment_poses, out_vertex2set);
+	std::cout << "start DFSPose "
 	DFSPose(out_vertex2set);
 	return final_reassembly;
 }

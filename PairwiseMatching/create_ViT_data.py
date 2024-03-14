@@ -9,7 +9,7 @@ from coutours_process import *
 from image_process import *
 from util import *
 import os, sys
-sys.path.append('/work/csl/code/piece/JigsawNet/JigsawCNN')
+sys.path.append('/data/csl/code/piece/JigsawNet/JigsawCNN')
 from Utils import GtPose
 from PairwiseAlignment2Image import FusionImage2
 
@@ -26,7 +26,7 @@ def process_image_pair(path, i, j, bg_color, training_dataset_path, gt_trans, nu
     contours1, contours2 = get_coutours(
         image1, bg_color), get_coutours(image2, bg_color)
     approx1, approx2 = approx_contours(
-        image1, contours1[0], 0.001), approx_contours(image2, contours2[0], 0.001)
+        image1, contours1[0], 0.0018), approx_contours(image2, contours2[0], 0.0018)
 
     # split contour
     mmp1, segments_si1, = split_contours(contours1[0], approx1)
@@ -37,8 +37,8 @@ def process_image_pair(path, i, j, bg_color, training_dataset_path, gt_trans, nu
     # prob_matrix, prb_score = [], []
     r_err_threshold, t_err_threshold = 4, 50
     for k in range(len(match_segments1)):
-        if k >= num_negatives:
-            break
+        # if k >= num_negatives:
+        #     break
         matrix = calculate_transform_matrix(
             match_segments1[k], match_segments2[k])
         trans = np.matrix([[matrix[0, 0], matrix[1, 0], matrix[1, 2]],
@@ -73,7 +73,7 @@ def erro_generate(path, i, j, bg_color, training_dataset_path, num_negatives):
     contours1, contours2 = get_coutours(
         image1, bg_color), get_coutours(image2, bg_color)
     approx1, approx2 = approx_contours(
-        image1, contours1[0], 0.001), approx_contours(image2, contours2[0], 0.001)
+        image1, contours1[0], 0.0018), approx_contours(image2, contours2[0], 0.0018)
 
     # split contour
     mmp1, segments_si1, = split_contours(contours1[0], approx1)
@@ -83,8 +83,8 @@ def erro_generate(path, i, j, bg_color, training_dataset_path, num_negatives):
         image1, image2, segments_si1, segments_si2)
     # prob_matrix, prb_score = [], []
     for k in range(len(match_segments1)):
-        if k >= num_negatives//8:
-            break
+        # if k >= 80:
+        #     break
         matrix = calculate_transform_matrix(
             match_segments1[k], match_segments2[k])
         matrix = [[matrix[0, 0], matrix[1, 0], matrix[1, 2]],
@@ -233,7 +233,7 @@ def process_path(args):
                 f.write(f"1\n")
         cv2.imwrite(image_path, erro_item[0])
 
-    for _ in range(num_negatives//8):
+    for _ in range(num_negatives//4):
         erro_matrix = add_uniform_noise_to_rigid_transform_2d(
             gt_matrix, 0.07, 0.12, 20, 50)
         erro_item = FusionImage2(image1, image2, erro_matrix, bg_color)
@@ -274,15 +274,15 @@ def create_dataset(raw_dataset_path, training_dataset_path, num_positives=1, num
 
 
 if __name__ == '__main__':
-    raw_dataset_path = glob.glob(os.path.join("/work/csl/code/piece/dataset/puzzles", "*"))
-    # raw_dataset_path = glob.glob(os.path.join("/work/csl/code/piece/dataset/raw_dataset", "*_*"))
-    # raw_dataset_path = glob.glob(os.path.join("/work/csl/code/piece/dataset/", "6*"))
-    num_positives = 1000
-    num_negatives = 520
-    num_works = 64
+    raw_dataset_path = glob.glob(os.path.join("/data/csl/dataset/jigsaw_dataset/test", "*"))
+    # raw_dataset_path = glob.glob(os.path.join("/data/csl/dataset/jigsaw_dataset/raw_dataset", "*_*"))
+    # raw_dataset_path = glob.glob(os.path.join("/data/csl/dataset/jigsaw_dataset", "6*"))
+    num_positives = 1
+    num_negatives = 1
+    num_works = 80
     # print(raw_dataset_path)
-    training_dataset_path = '/work/csl/code/piece/dataset/szp_train_dataset'
-    # training_dataset_path = '/work/csl/code/piece/dataset/tmp_test'
+    training_dataset_path = '/data/csl/dataset/jigsaw_dataset/szp_test'
+    # training_dataset_path = '/data/csl/dataset/jigsaw_dataset/tmp_test'
     with open(os.path.join(training_dataset_path, "target.txt"), "w+") as f:
         pass
     create_dataset(raw_dataset_path, training_dataset_path,

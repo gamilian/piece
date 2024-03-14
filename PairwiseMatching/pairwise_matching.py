@@ -44,17 +44,17 @@ def process_image_pair(args):
     image1 = cv2.imread(image_path1)
     image2 = cv2.imread(image_path2)
     # Calculate contour
-    contours1, contours2 = get_coutours(image1, bg_color), get_coutours(image2, bg_color)
+    contour1, contour2 = get_coutours(image1, bg_color)[0], get_coutours(image2, bg_color)[0][::-1]
     # mu1 = cv2.moments(contours1[0], True)
     # mu2 = cv2.moments(contours2[0], True)
     # mc1 = [mu1['m10'] / mu1['m00'], mu1['m01'] / mu1['m00']]
     # mc2 = [mu2['m10'] / mu2['m00'], mu2['m01'] / mu2['m00']]
     # Approximate contour
-    approx1, approx2 = approx_contours(image1, contours1[0], 0.001), approx_contours(image2, contours2[0], 0.001)
+    approx1, approx2 = approx_contours(image1, contour1, 0.0025), approx_contours(image2, contour2, 0.0025)
 
     # split contour
-    mmp1, segments_si1, = split_contours(contours1[0], approx1)
-    mmp2, segments_si2 = split_contours(contours2[0], approx2)
+    mmp1, segments_si1, = split_contours(contour1, approx1)
+    mmp2, segments_si2 = split_contours(contour2, approx2)
     # segments_sik1, segments_sik2 = split_color(image1, segments_si1), split_color(image2, segments_si2)
     
     # search match segments
@@ -67,38 +67,38 @@ def process_image_pair(args):
         matrix1 = calculate_transform_matrix(match_segments1[k], match_segments2[k])
         # matrix2 = calculate_transform_matrix(match_segments1[k], match_segments2[k][::-1])
 
-        if fusion_image(image1, image2, matrix1, bg_color)[1] < 0.05:
-            score = calculate_prob(image1, image2, segments_si1, segments_si2,
-                                    matrix1, 1.5)
-            if score > 100:
-                # prob_matrix.append(matrix1)
-                # prb_score.append(score1)
-                points1, points2 = contours1[0].squeeze(1), contours2[0].squeeze(1)[::-1]
-                lcs1, lcs2 = longest_common_subsequence(points1, points2, matrix1, 2)
-                cloud1, cloud2 = np.array([points1[i] for i in lcs1]), np.array([points2[i] for i in lcs2])
-                cloud2_transformed = np.dot(np.column_stack((cloud2, np.ones(len(cloud2)))), matrix1.T)[:, :2]
-                final_transform = icp(cloud1, cloud2_transformed)
-                final_transform = np.matmul(final_transform, matrix1)
-                final_score = int(calculate_prob(image1, image2, segments_si1, segments_si2, final_transform, 1.5))
+        if fusion_image(image1, image2, matrix1, bg_color)[1] < 0.03:
+            score = int(calculate_prob(image1, image2, segments_si1, segments_si2,
+                                    matrix1, 3))
+            if score > 66:
+                # points1, points2 = contour1.squeeze(1), contour2.squeeze(1)
+                # lcs1, lcs2 = longest_common_subsequence(points1, points2, matrix1, 2)
+                # cloud1, cloud2 = np.array([points1[i] for i in lcs1]), np.array([points2[i] for i in lcs2])
+                # cloud2_transformed = np.dot(np.column_stack((cloud2, np.ones(len(cloud2)))), matrix1.T)[:, :2]
+                # final_transform = icp(cloud1, cloud2_transformed)
+                # final_transform = np.matmul(final_transform, matrix1)
+                # final_score = int(calculate_prob(image1, image2, segments_si1, segments_si2, final_transform, 2))
                 # lcs1, lcs2 = longest_common_continuous_subsequence_circular(points1, points2, final_transform, 4)
                 # cloud2 = np.array([points2[i] for i in lcs2])
                 points = cloud2[::-1]
                 # offset_maxtrix = fusion_image(image1, image2, matrix, bg_color)[2]
                 # line = np.dot(np.column_stack((line, np.ones(len(line)))), offset_maxtrix.T)[:, :2]
-                if final_score > 200:
-                    with write_lock:
-                        with open(config.alignments_file, "a+", encoding='utf-8') as f:
-                            f.write(f"{i-1} {j-1} {final_score} ")
-                            # f.write("%f %f %f %f %f %f 0.000000 0.000000 1.000000 line" % (
-                            #     final_transform[0, 0], final_transform[0, 1], final_transform[0, 2], final_transform[1, 0], final_transform[1, 1],
-                            #     final_transform[1, 2]))
-                            f.write("%f %f %f %f %f %f 0.000000 0.000000 1.000000 line" % (
-                                final_transform[0, 0], final_transform[1, 0], final_transform[1, 2], final_transform[0, 1], final_transform[1, 1],
-                                final_transform[0, 2]))
-                            # for point in points:
-                            #     f.write(f" {point[0]} {point[1]}")
-                            f.write(f"\n")
-        
+                # if final_score > 70:
+                final_transform = matrix1
+                final_score = score
+                with write_lock:
+                    with open(config.alignments_file, "a+", encoding='utf-8') as f:
+                        f.write(f"{i-1} {j-1} {final_score} ")
+                        # f.write("%f %f %f %f %f %f 0.000000 0.000000 1.000000 line" % (
+                        #     final_transform[0, 0], final_transform[0, 1], final_transform[0, 2], final_transform[1, 0], final_transform[1, 1],
+                        #     final_transform[1, 2]))
+                        f.write("%f %f %f %f %f %f 0.000000 0.000000 1.000000 line" % (
+                            final_transform[0, 0], final_transform[1, 0], final_transform[1, 2], final_transform[0, 1], final_transform[1, 1],
+                            final_transform[0, 2]))
+                        # for point in points:
+                        #     f.write(f" {point[0]} {point[1]}")
+                        f.write(f"\n")
+    
 
     t2 = time.time()
     logging.info(f"Processing image {i} and image {j} complete, cost {t2-t1} seconds")

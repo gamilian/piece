@@ -1,28 +1,30 @@
 import cv2
 import numpy as np
 import sys
-sys.path.append("/work/csl/code/piece/PairwiseMatching")
+sys.path.append("/data/csl/code/piece/PairwiseMatching")
 from util import calculate_color_similarity, calculate_average_color
 
 # calculate the rigid transformation matrix
 def calculate_transform_matrix(cloud1, cloud2):
-    pt1, pt2 = cloud1[0], cloud1[-1]
-    pt3, pt4 = cloud2[0], cloud2[-1]
+    pt1, pt2 = np.array(cloud1[0]), np.array(cloud1[-1])
+    pt3, pt4 = np.array(cloud2[0]), np.array(cloud2[-1])
     # Calculate the center of mass
-    center1 = ((pt1[0] + pt2[0]) / 2, (pt1[1] + pt2[1]) / 2)
-    center2 = ((pt3[0] + pt4[0]) / 2, (pt3[1] + pt4[1]) / 2)
+    center1 = (pt1 + pt2) / 2
+    center2 = (pt3 + pt4) / 2
 
     # Calculate the angle
     angle1 = np.arctan2(pt2[1] - pt1[1], pt2[0] - pt1[0])
-    angle2 = np.arctan2(pt3[1] - pt4[1], pt3[0] - pt4[0])
+    angle2 = np.arctan2(pt4[1] - pt3[1], pt4[0] - pt3[0])
     # Calculate rotation angle
     rotation_angle = angle1 - angle2
-    rotation_matrix = np.array([[np.cos(rotation_angle), -np.sin(rotation_angle)],
-                                [np.sin(rotation_angle), np.cos(rotation_angle)]])
+    cos_angle = np.cos(rotation_angle)
+    sin_angle = np.sin(rotation_angle)
+    rotation_matrix = np.array([[cos_angle, -sin_angle],
+                                [sin_angle, cos_angle]])
     
     # Apply rotation matrix and calculate translation vector
-    rotated_center = rotation_matrix@(np.array([center2[0], center2[1]]))
-    translation_vector = np.array([center1[0] - rotated_center[0], center1[1] - rotated_center[1]])
+    rotated_center = rotation_matrix @ center2
+    translation_vector = center1 - rotated_center
     # Construct rigid transformation matrix
     rigid_transform_matrix = np.eye(3)
     # Place the rotation matrix and translation vector into a rigid transformation matrix
@@ -111,30 +113,34 @@ def fusion_image(src, dst, transform, bg_color=[0, 0, 0]):
 
 
 # 计算刚性变换的成对兼容度
-def calculate_prob(image1, image2, segments_sik1, segments_sik2, transform, threshold=3.6, alp=5):
+def calculate_prob(image1, image2, segments_sik1, segments_sik2, transform, threshold=3.6, alp=6):
 
     w1, w2, w3 = 0, 0, 0
+    transformed_segments_sik2 = []
+    for segment_sik2 in segments_sik2:
+        if len(segment_sik2) < 3:
+            continue
+        center_point2 = np.mean(segment_sik2, axis=0)
+        center_point2_transformed = np.matmul(transform, np.append(center_point2, 1))[:2]
+        transformed_segments_sik2.append((center_point2_transformed, len(segment_sik2)))
+
     for segment_sik1 in segments_sik1:
         if len(segment_sik1) < 3:
             continue
-        for segment_sik2 in segments_sik2:
-            if len(segment_sik2) < 3:
-                continue
-            center_point1, center_point2 = np.mean(segment_sik1, axis=0), np.mean(segment_sik2, axis=0)
-            center_point2 = np.append(center_point2, 1)
-            # 对质心进行刚性变换
-            center_point2_translate = np.matmul(transform, center_point2)
-            center_point2 = center_point2_translate[:2]
-            if np.linalg.norm(center_point1 - center_point2) < threshold:
-                l1, l2 = len(segment_sik1), len(segment_sik2)
+        center_point1 = np.mean(segment_sik1, axis=0)
+       
+        l1 = len(segment_sik1)
+        for center_point2_transformed, l2 in transformed_segments_sik2:
+            if np.linalg.norm(center_point1 - center_point2_transformed) < threshold:
                 w1 += (l1 + l2) / 2
                 c1, c2 = calculate_average_color(image1, segment_sik1), calculate_average_color(image2, segment_sik2)
                 # w2 += (l1 + l2) / 2 * (1 - compute_color_similarity(c1, c2))
-                similarity = calculate_color_similarity(c1, c2)
                 # if similarity > 0.98:
                 #     w2 += similarity
+                similarity = calculate_color_similarity(c1, c2)
                 w2 += (l1 + l2) / 2 * similarity
                 w3 += 1
+            
 
     # if w2 < 0.3:
     #     return 0
