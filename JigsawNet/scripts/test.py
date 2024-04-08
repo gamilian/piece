@@ -54,7 +54,7 @@ def main():
         pretrained_cfg_file=args.pretrained_cfg_file,
         num_labels=2,
     ).to(device)
-    resume_checkpoint = os.path.join(args.resume_checkpoint_dir, "pit_s-distilled_epoch10.pth")
+    resume_checkpoint = os.path.join(args.resume_checkpoint_dir, "pit_s-distilled_epoch9.pth")
     model.load_state_dict(torch.load(resume_checkpoint))
 
     logger.log("creating data loader...")
@@ -67,8 +67,8 @@ def main():
 
 def create_argparser():
     defaults = dict(
-        test_dataset_path = "/data/csl/dataset/jigsaw_dataset/szp_test_roi",
-        batch_size = 128,
+        test_dataset_path = "/data/csl/dataset/jigsaw_dataset/image_test",
+        batch_size = 1,
         pretrained_cfg_file='/data/csl/code/piece/models/pit_s-distilled_224/model.safetensors',
         resume_checkpoint_dir="/data/csl/code/piece/checkpoints/JigsawVIT_checkpoint",
         exp_name = "tmp"

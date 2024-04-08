@@ -1,6 +1,6 @@
 import os
 
-dataset = "szp200_ex"
+dataset = "hand_tear_image"
 dataset_path = os.path.join("/data/csl/dataset/jigsaw_dataset", dataset)
 
 

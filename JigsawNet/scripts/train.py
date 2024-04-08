@@ -18,15 +18,12 @@ from JiT import dist_util, logger, dataload
 
 
 def main():
-    print(torch.cuda.device_count())
     print("set_seed")
     set_seed(1)
     args = create_argparser().parse_args()
     dist_util.setup_dist()
     device = dist_util.dev()
-    print(torch.cuda.device_count())
     
-    # device = torch.device("cuda:0")
     logger.configure(dir=f'logs/{args.exp_name}')
     logger.log(f"using device {device} ...")
 
@@ -50,10 +47,10 @@ def main():
         num_labels=2
     ).to(device)
     
-    # resume_checkpoint = os.path.join(
-    #     args.resume_checkpoint_dir, "pit_s-distilled_224_epoch1.pth")
-    # logger.log(f"load checkpoint: {resume_checkpoint}...")
-    # model.load_state_dict(torch.load(resume_checkpoint))
+    resume_checkpoint = os.path.join(
+        args.resume_checkpoint_dir, "pit_s-distilled_epoch8.pth")
+    logger.log(f"load checkpoint: {resume_checkpoint}...")
+    model.load_state_dict(torch.load(resume_checkpoint))
     logger.log("creating data loader...")
     train_dataloader, valid_dataloader = get_train_dataloader(
         args.train_dataset_path, args.batch_size)
@@ -69,7 +66,7 @@ def main():
 
 def create_argparser():
     defaults = dict(
-        train_dataset_path="/data/csl/dataset/jigsaw_dataset/szp_train_roi",
+        train_dataset_path="/data/csl/dataset/jigsaw_dataset/mg_training_dataset",
         lr=1e-5,
         epochs=10,
         batch_size=256,

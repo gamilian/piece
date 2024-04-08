@@ -17,9 +17,9 @@ class GtPose:
                     self.data.append(pose)
 
         # # transform ground truth to identity
-        # baseline = np.linalg.inv(self.data[0])
-        # for i in range(len(self.data)):
-        #     self.data[i] = np.matmul(baseline, self.data[i])
+        baseline = np.linalg.inv(self.data[0])
+        for i in range(len(self.data)):
+            self.data[i] = np.matmul(baseline, self.data[i])
 
 class GtPoseMatrix:
     def __init__(self, gt_filename):

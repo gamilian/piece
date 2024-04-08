@@ -50,7 +50,7 @@ def process_image_pair(args):
     # mc1 = [mu1['m10'] / mu1['m00'], mu1['m01'] / mu1['m00']]
     # mc2 = [mu2['m10'] / mu2['m00'], mu2['m01'] / mu2['m00']]
     # Approximate contour
-    approx1, approx2 = approx_contours(image1, contour1, 0.0025), approx_contours(image2, contour2, 0.0025)
+    approx1, approx2 = approx_contours(image1, contour1, 0.0018), approx_contours(image2, contour2, 0.0018)
 
     # split contour
     mmp1, segments_si1, = split_contours(contour1, approx1)
@@ -70,7 +70,7 @@ def process_image_pair(args):
         if fusion_image(image1, image2, matrix1, bg_color)[1] < 0.03:
             score = int(calculate_prob(image1, image2, segments_si1, segments_si2,
                                     matrix1, 3))
-            if score > 66:
+            if score > 50:
                 # points1, points2 = contour1.squeeze(1), contour2.squeeze(1)
                 # lcs1, lcs2 = longest_common_subsequence(points1, points2, matrix1, 2)
                 # cloud1, cloud2 = np.array([points1[i] for i in lcs1]), np.array([points2[i] for i in lcs2])
@@ -80,7 +80,7 @@ def process_image_pair(args):
                 # final_score = int(calculate_prob(image1, image2, segments_si1, segments_si2, final_transform, 2))
                 # lcs1, lcs2 = longest_common_continuous_subsequence_circular(points1, points2, final_transform, 4)
                 # cloud2 = np.array([points2[i] for i in lcs2])
-                points = cloud2[::-1]
+                # points = cloud2[::-1]
                 # offset_maxtrix = fusion_image(image1, image2, matrix, bg_color)[2]
                 # line = np.dot(np.column_stack((line, np.ones(len(line)))), offset_maxtrix.T)[:, :2]
                 # if final_score > 70:

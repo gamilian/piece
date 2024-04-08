@@ -10,7 +10,7 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "python": "/home/csl/.conda/envs/vit/bin/python", 
+            "python": "/home/csl/.conda/envs/torch/bin/python", 
             "console": "integratedTerminal",
             "args": [
                 "--exp_name",            "tmp",

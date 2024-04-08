@@ -107,8 +107,8 @@ def erro_generate(path, i, j, bg_color, training_dataset_path, num_negatives):
     match_segments1, match_segments2 = search_match_segments(
         image1, image2, segments_si1, segments_si2)
     for k in range(len(match_segments1)):
-        if k >= 10:
-            break
+        # if k >= 30:
+        #     break
         matrix = calculate_transform_matrix(
             match_segments1[k], match_segments2[k])
 
@@ -243,37 +243,32 @@ def process_path(args):
 
     gt_item = FusionImage2(image1, image2, gt_matrix, bg_color)
     if gt_item[1] < 0.0005:
-        erro_generate(path, i, j, bg_color,
-                      training_dataset_path, num_negatives)
+        # erro_generate(path, i, j, bg_color,
+        #               training_dataset_path, num_negatives)
         return
 
     with global_idx.get_lock():
-        image_path = os.path.join(
-            training_dataset_path, "image", f"{global_idx.value}.png")
+        image_path = os.path.join(training_dataset_path, "image", f"{global_idx.value}.png")
         global_idx.value += 1
         with open(os.path.join(training_dataset_path, "target.txt"), "a+") as f:
             f.write(f"1\n")
         with open(os.path.join(training_dataset_path, "roi.txt"), "a+") as f:
-            f.write(
-                f"{gt_item[3][0]} {gt_item[3][1]} {gt_item[3][2]} {gt_item[3][3]}\n")
+            f.write(f"{gt_item[3][0]} {gt_item[3][1]} {gt_item[3][2]} {gt_item[3][3]}\n")
     cv2.imwrite(image_path, gt_item[0])
 
-    for _ in range(num_positives):
-        noise_gt = add_uniform_noise_to_rigid_transform_2d(
-            gt_matrix, 0, 0.025, 0, 2.5)
-        noise_item = FusionImage2(image1, image2, noise_gt, bg_color)
-        if noise_item[1] > 0.03:
-            continue
-        with global_idx.get_lock():
-            image_path = os.path.join(
-                training_dataset_path, "image", f"{global_idx.value}.png")
-            global_idx.value += 1
-            with open(os.path.join(training_dataset_path, "target.txt"), "a+") as f:
-                f.write(f"1\n")
-            with open(os.path.join(training_dataset_path, "roi.txt"), "a+") as f:
-                f.write(
-                    f"{gt_item[3][0]} {gt_item[3][1]} {gt_item[3][2]} {gt_item[3][3]}\n")
-        cv2.imwrite(image_path, noise_item[0])
+    # for _ in range(num_positives):
+    #     noise_gt = add_uniform_noise_to_rigid_transform_2d(gt_matrix, 0.015, 0.036, 3, 8)
+    #     noise_item = FusionImage2(image1, image2, noise_gt, bg_color)
+    #     if noise_item[1] > 0.05:
+    #         continue
+    #     with global_idx.get_lock():
+    #         image_path = os.path.join(training_dataset_path, "image", f"{global_idx.value}.png")
+    #         global_idx.value += 1
+    #         with open(os.path.join(training_dataset_path, "target.txt"), "a+") as f:
+    #             f.write(f"1\n")
+    #         with open(os.path.join(training_dataset_path, "roi.txt"), "a+") as f:
+    #             f.write(f"{gt_item[3][0]} {gt_item[3][1]} {gt_item[3][2]} {gt_item[3][3]}\n")
+    #     cv2.imwrite(image_path, noise_item[0])
 
     # for _ in range(num_positives // 2):
     #     erro_matrix = add_uniform_noise_to_rigid_transform_2d(
@@ -290,24 +285,23 @@ def process_path(args):
     #                 f"{gt_item[3][0]} {gt_item[3][1]} {gt_item[3][2]} {gt_item[3][3]}\n")
     #     cv2.imwrite(image_path, erro_item[0])
 
-    for _ in range(num_negatives):
-        erro_matrix = add_uniform_noise_to_rigid_transform_2d(
-            gt_matrix, 0.07, 0.12, 10, 50)
-        erro_item = FusionImage2(image1, image2, erro_matrix, bg_color)
-        if erro_item[1] > 0.03:
-            continue
-        with global_idx.get_lock():
-            image_path = os.path.join(
-                training_dataset_path, "image", f"{global_idx.value}.png")
-            global_idx.value += 1
-            with open(os.path.join(training_dataset_path, "target.txt"), "a+") as f:
-                f.write(f"0\n")
-            with open(os.path.join(training_dataset_path, "roi.txt"), "a+") as f:
-                f.write(f"{gt_item[3][0]} {gt_item[3][1]} {gt_item[3][2]} {gt_item[3][3]}\n")
-        cv2.imwrite(image_path, erro_item[0])
+    # for _ in range(num_negatives//2):
+    #     erro_matrix = add_uniform_noise_to_rigid_transform_2d(
+    #         gt_matrix, 0.07, 0.12, 15, 50)
+    #     erro_item = FusionImage2(image1, image2, erro_matrix, bg_color)
+    #     if erro_item[1] > 0.08:
+    #         continue
+    #     with global_idx.get_lock():
+    #         image_path = os.path.join(training_dataset_path, "image", f"{global_idx.value}.png")
+    #         global_idx.value += 1
+    #         with open(os.path.join(training_dataset_path, "target.txt"), "a+") as f:
+    #             f.write(f"0\n")
+    #         with open(os.path.join(training_dataset_path, "roi.txt"), "a+") as f:
+    #             f.write(f"{gt_item[3][0]} {gt_item[3][1]} {gt_item[3][2]} {gt_item[3][3]}\n")
+    #     cv2.imwrite(image_path, erro_item[0])
 
-    # process_image_pair(path, i, j, bg_color,
-    #                    training_dataset_path, gt_matrix, num_negatives)
+    process_image_pair(path, i, j, bg_color,
+                       training_dataset_path, gt_matrix, num_negatives)
 
 
 def create_dataset(raw_dataset_path, training_dataset_path, num_positives=1, num_negatives=4, processes=16):
@@ -322,32 +316,27 @@ def create_dataset(raw_dataset_path, training_dataset_path, num_positives=1, num
         num_fragments = len(gt_pose.data)
         for i in range(num_fragments):
             for j in range(i + 1, num_fragments):
-                args_list.append((path, i, j, gt_pose, bg_color,
-                                 training_dataset_path, num_positives, num_negatives))
+                args_list.append((path, i, j, gt_pose, bg_color, training_dataset_path, num_positives, num_negatives))
 
     total_tasks = len(args_list)
     print(f"create dataset, total_tasks: {total_tasks}")
     with Pool(processes=processes) as pool:
-        results = list(
-            tqdm(pool.imap(process_path, args_list), total=total_tasks))
+        results = list(tqdm(pool.imap(process_path, args_list), total=total_tasks))
 
     print(f"create dataset done, total dataset: {global_idx.value}")
 
 
 if __name__ == '__main__':
-    raw_dataset_path = glob.glob(os.path.join(
-        "/data/csl/dataset/jigsaw_dataset/piece_massive_raw", "*", "*"))
-    # raw_dataset_path = glob.glob(os.path.join("/data/csl/dataset/jigsaw_dataset/raw_dataset", "*_*"))
-    # raw_dataset_path = glob.glob(os.path.join("/data/csl/dataset/jigsaw_dataset/puzzles_test","szp*"))
-    num_positives = 20
-    num_negatives = 10
-    num_works = 80
+    # raw_dataset_path = glob.glob(os.path.join("/data/csl/dataset/jigsaw_dataset/piece_massive", "*", "*"))
+    raw_dataset_path = glob.glob(os.path.join("/data/csl/dataset/jigsaw_dataset/image_raw_test", "*"))
+    num_positives = 300
+    num_negatives = 200
+    num_works = 50
     # print(raw_dataset_path)
-    training_dataset_path = '/data/csl/dataset/jigsaw_dataset/piece_massive_train'
-    # training_dataset_path = '/data/csl/dataset/jigsaw_dataset/szp_test_roi'
+  
+    training_dataset_path = '/data/csl/dataset/jigsaw_dataset/image_test'
     with open(os.path.join(training_dataset_path, "target.txt"), "w+") as f:
         pass
     with open(os.path.join(training_dataset_path, "roi.txt"), "w+") as f:
         pass
-    create_dataset(raw_dataset_path, training_dataset_path,
-                   num_positives, num_negatives, num_works)
+    create_dataset(raw_dataset_path, training_dataset_path, num_positives, num_negatives, num_works)

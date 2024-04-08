@@ -128,6 +128,7 @@ def ValidatePathNet(alignments, gt_pose, fragments_dir, net, bg_color, device):
     print(f'recall: {tp / (tp + fn)}')
 
 def meassure_pairwise(alignments, fragments_dir, net, bg_color, device):
+    print("meassure_pairwise--------------")
     net.eval()
     with open(os.path.join(fragments_dir, "filtered_alignments.txt"), 'w+') as f:
         for alignment in alignments.data:
@@ -159,79 +160,79 @@ def meassure_pairwise(alignments, fragments_dir, net, bg_color, device):
             output = F.softmax(output, dim=1).squeeze(0)
             correct_probability = output.tolist()[1]
         
-            if correct_probability > 0.5:
+            if correct_probability > 0.6:
                 # cv2.imwrite(os.path.join(fragments_dir, "test" , f"fusion_{v1 + 1}_{v2 + 1}_{trans[0][0]}{trans[0][1]}_{correct_probability}.png"), item[0])
                 f.write(f"{v1}\t{v2}\t{correct_probability}\t0\n")
                 f.write(f"{trans[0, 0]} {trans[0, 1]} {trans[0, 2]}\n{trans[1, 0]} {trans[1, 1]} {trans[1, 2]}\n0 0 1\n" )
     print("meanssure_pairwise complete!")
 
 
+# def filter_pairwise(alignments, fragments_dir, net, bg_color, device, batch_size=128):
+#     net.eval()
+#     image_cache = {}
+#     output_lines = ["Node {}\n".format(i) for i in range(alignments.node_num)]
+#     all_images = []
+#     all_info = []
+#     print("loading images ...")
+#     # 收集所有图像
+#     t1 = time.time()
+#     for alignment in alignments.data:
+#         v1, v2 = alignment.frame1, alignment.frame2
+#         score, trans = alignment.score, alignment.transform
+
+#         # 从缓存中读取或加载图像
+#         if v1 not in image_cache:
+#             image_cache[v1] = cv2.imread(os.path.join(fragments_dir, f"fragment_{v1 + 1:04}.png"))
+#         if v2 not in image_cache:
+#             image_cache[v2] = cv2.imread(os.path.join(fragments_dir, f"fragment_{v2 + 1:04}.png"))
+        
+#         image1, image2 = image_cache[v1], image_cache[v2]
+#         # image1 = cv2.imread(os.path.join(fragments_dir, f"fragment_{v1 + 1:04}.png"))
+#         # image2 = cv2.imread(os.path.join(fragments_dir, f"fragment_{v2 + 1:04}.png"))
+#         item = FusionImage2(image1, image2, trans, bg_color)
+#         if len(item) <= 0 or item[1] > 0.05:  # overlap_ratio
+#             continue
+
+#         image_rgb = cv2.cvtColor(item[0], cv2.COLOR_BGR2RGB)  # image_cv2
+#         pil_image = Image.fromarray(image_rgb)
+#         img = transform(pil_image)  # 应用预处理转换
+#         all_images.append(img)
+#         all_info.append((v1, v2, score, trans))
+#     print(f"load images complete, cost {(time.time() - t1) / 60} minutes")
+#     print("evaluating ...")
+#     # 分批处理图像
+#     num_batches = len(all_images) // batch_size + (1 if len(all_images) % batch_size else 0)
+#     for batch_idx in tqdm(range(num_batches)):
+#         start_idx = batch_idx * batch_size
+#         end_idx = min((batch_idx + 1) * batch_size, len(all_images))
+#         batch_images = all_images[start_idx:end_idx]
+#         batch_info = all_info[start_idx:end_idx]
+
+#         # 构建批量数据并进行批量推理
+#         batch_tensor = torch.stack(batch_images).to(device)
+#         # print(net.device)
+#         # print(batch_tensor.device)
+#         with torch.no_grad():
+#             output_batch = net(batch_tensor)
+
+#         # 处理批量推理结果
+#         for idx, output in enumerate(output_batch):
+#             correct_probability = torch.nn.functional.softmax(output, dim=0)[1].item()
+#             if correct_probability > 0.66:
+#                 v1, v2, score, trans = batch_info[idx]
+#                 line = f"{v1} {v2} {score} "
+#                 line += "%f %f %f %f %f %f 0.000000 0.000000 1.000000\n" % (
+#                     trans[0, 0], trans[0, 1], trans[0, 2], trans[1, 0], trans[1, 1], trans[1, 2])
+#                 output_lines.append(line)
+#     print("writing ...")
+#     # 将结果一次性写入文件
+#     with open(os.path.join(fragments_dir, "vit_filter_alignments.txt"), 'w+') as f:
+#         f.writelines(output_lines)
+
+
 def filter_pairwise(alignments, fragments_dir, net, bg_color, device, batch_size=128):
     net.eval()
-    image_cache = {}
-    output_lines = ["Node {}\n".format(i) for i in range(alignments.node_num)]
-    all_images = []
-    all_info = []
-    print("loading images ...")
-    # 收集所有图像
-    t1 = time.time()
-    for alignment in alignments.data:
-        v1, v2 = alignment.frame1, alignment.frame2
-        score, trans = alignment.score, alignment.transform
-
-        # 从缓存中读取或加载图像
-        if v1 not in image_cache:
-            image_cache[v1] = cv2.imread(os.path.join(fragments_dir, f"fragment_{v1 + 1:04}.png"))
-        if v2 not in image_cache:
-            image_cache[v2] = cv2.imread(os.path.join(fragments_dir, f"fragment_{v2 + 1:04}.png"))
-        
-        image1, image2 = image_cache[v1], image_cache[v2]
-        # image1 = cv2.imread(os.path.join(fragments_dir, f"fragment_{v1 + 1:04}.png"))
-        # image2 = cv2.imread(os.path.join(fragments_dir, f"fragment_{v2 + 1:04}.png"))
-        item = FusionImage2(image1, image2, trans, bg_color)
-        if len(item) <= 0 or item[1] > 0.05:  # overlap_ratio
-            continue
-
-        image_rgb = cv2.cvtColor(item[0], cv2.COLOR_BGR2RGB)  # image_cv2
-        pil_image = Image.fromarray(image_rgb)
-        img = transform(pil_image)  # 应用预处理转换
-        all_images.append(img)
-        all_info.append((v1, v2, score, trans))
-    print(f"load images complete, cost {(time.time() - t1) / 60} minutes")
-    print("evaluating ...")
-    # 分批处理图像
-    num_batches = len(all_images) // batch_size + (1 if len(all_images) % batch_size else 0)
-    for batch_idx in tqdm(range(num_batches)):
-        start_idx = batch_idx * batch_size
-        end_idx = min((batch_idx + 1) * batch_size, len(all_images))
-        batch_images = all_images[start_idx:end_idx]
-        batch_info = all_info[start_idx:end_idx]
-
-        # 构建批量数据并进行批量推理
-        batch_tensor = torch.stack(batch_images).to(device)
-        # print(net.device)
-        # print(batch_tensor.device)
-        with torch.no_grad():
-            output_batch = net(batch_tensor)
-
-        # 处理批量推理结果
-        for idx, output in enumerate(output_batch):
-            correct_probability = torch.nn.functional.softmax(output, dim=0)[1].item()
-            if correct_probability > 0.5:
-                v1, v2, score, trans = batch_info[idx]
-                line = f"{v1} {v2} {score} "
-                line += "%f %f %f %f %f %f 0.000000 0.000000 1.000000\n" % (
-                    trans[0, 0], trans[0, 1], trans[0, 2], trans[1, 0], trans[1, 1], trans[1, 2])
-                output_lines.append(line)
-    print("writing ...")
-    # 将结果一次性写入文件
     with open(os.path.join(fragments_dir, "vit_filter_alignments.txt"), 'w+') as f:
-        f.writelines(output_lines)
-
-
-# def filter_pairwise(alignments, fragments_dir, net, bg_color, device):
-    net.eval()
-    with open(os.path.join(fragments_dir, "alignments.txt"), 'w+') as f:
         for i in range(alignments.node_num):
             f.write(f"Node {i}\n")   
     
@@ -244,7 +245,7 @@ def filter_pairwise(alignments, fragments_dir, net, bg_color, device, batch_size
         image1 = cv2.imread(os.path.join(fragments_dir, "fragment_{0:04}.png".format(v1 + 1)))
         image2 = cv2.imread(os.path.join(fragments_dir, "fragment_{0:04}.png".format(v2 + 1)))
         item = FusionImage2(image1, image2, trans, bg_color)
-        
+             
         if len(item) <= 0:
             continue
         image_cv2, overlap_ratio, transform_offset = item[0], item[1], item[2]
@@ -262,8 +263,10 @@ def filter_pairwise(alignments, fragments_dir, net, bg_color, device, batch_size
             output = net(img.unsqueeze(0).to(device))
         output = F.softmax(output, dim=1).squeeze(0)
         correct_probability = output.tolist()[1]
-
-        with open(os.path.join(fragments_dir, "alignments.txt"), 'a+') as f:
+        # if correct_probability > 0.2:
+        cv2.imwrite(os.path.join(fragments_dir, "test" , f"fusion_{v1 + 1}_{v2 + 1}_{trans[0][0]}{trans[0][1]}_{correct_probability}.png"), item[0])
+         
+        with open(os.path.join(fragments_dir, "vit_filter_alignments.txt"), 'a+') as f:
             if correct_probability > 0.5:
                 f.write(f"{v1} {v2} {score} ")
                 f.write("%f %f %f %f %f %f 0.000000 0.000000 1.000000" % (
@@ -284,11 +287,11 @@ def main():
     ).to(device)
     logger.log("load resume_checkpoint ...")
 
-    resume_checkpoint = os.path.join(args.resume_checkpoint_dir, "pit_s-distilled_epoch10.pth")
+    resume_checkpoint = os.path.join(args.resume_checkpoint_dir, "pit_s-distilled_resume.pth")
     model.load_state_dict(torch.load(resume_checkpoint))
-    fragments_dirs = glob(os.path.join(args.measure_data_root, "*_ex"))
+    fragments_dirs = glob(os.path.join(args.measure_data_root, "*image"))
     for i in range(len(fragments_dirs)):
-        print(f"dataset {i+1}/{len(fragments_dirs)}:  {fragments_dirs[i]}")
+        logger.log(f"dataset {i+1}/{len(fragments_dirs)}:  {fragments_dirs[i]}")
         # if not os.path.exists(os.path.join(fragments_dirs[i], "alignments.txt")):
         #     continue
         bg_color_file = os.path.join(fragments_dirs[i], "bg_color.txt")
@@ -305,6 +308,7 @@ def main():
             alignments = Utils.Alignment2d(alignment)
             filter_pairwise(alignments, fragments_dirs[i], model, bg_color, device)
         elif args.mode == "infer":
+            print("-----infer-----------")
             filtered_alignment = os.path.join(fragments_dirs[i], "alignments.txt")
             gt_pose_path = os.path.join(fragments_dirs[i], "ground_truth.txt")
             
@@ -314,7 +318,7 @@ def main():
                 ValidatePathNet(alignments, gt_pose, fragments_dirs[i], model, bg_color, device)
             else:
                 meassure_pairwise(alignments, fragments_dirs[i], model, bg_color, device)
-        print("----------------")
+        logger.log("----------------")
  
 def create_argparser():
     defaults = dict(

@@ -147,7 +147,9 @@ def search_match_segments(img_1, img_2, segments_si1, segments_si2):
     point_cloud_1 = []
     point_cloud_2 = []
     length_threshold = 3
-    color_thresshold = 0.98
+    # color_thresshold = 0.98
+    length_threshold = 5
+    color_thresshold = 0.9
     # 遍历每个片段Si
     for segment1_si in segments_si1:
         # 初始化当前片段si的第一个段sik

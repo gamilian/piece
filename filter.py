@@ -73,7 +73,7 @@ def get_final_transform_pair(args):
     if final_score < score:
         final_score = score
         final_transform = initial_transform
-    if final_score > 100:
+    if final_score > 80:
     # offset_maxtrix = fusion_image(image1, image2, matrix, bg_color)[2]
     # line = np.dot(np.column_stack((line, np.ones(len(line)))), offset_maxtrix.T)[:, :2]
         shared_data.append(Transform2d(v1, v2, final_score, final_transform))
@@ -124,7 +124,7 @@ def get_final_transform(data_path, processes=32):
             f.write(f"{trans[0, 0]} {trans[0, 1]} {trans[0, 2]} {trans[1, 0]} {trans[1, 1]} {trans[1, 2]} 0 0 1\n")
 
 if __name__=='__main__':
-    data_path = "JigsawNet/Measure/szp100_ex"
+    data_path = "JigsawNet/Measure/hand_tear_image"
     num_works = 50
     setup_logging()
     get_final_transform(data_path, num_works)
